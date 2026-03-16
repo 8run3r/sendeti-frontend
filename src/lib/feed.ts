@@ -66,7 +66,7 @@ function parsePrice(raw: unknown): number {
 export async function fetchProducts(): Promise<FeedProduct[]> {
   try {
     const res = await fetch(FEED_URL, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
     })
 
     if (!res.ok) throw new Error(`Feed fetch failed: ${res.status}`)
