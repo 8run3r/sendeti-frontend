@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
+import { unstable_cache } from 'next/cache'
 
 const FEED_URL = process.env.FEED_URL ||
   'https://www.sendeti.sk/fotky46145/xml/google_nakupy.xml'
@@ -81,9 +82,9 @@ function parsePrice(raw: unknown): number {
   ) || 0
 }
 
-export async function fetchProducts(): Promise<Product[]> {
+async function fetchProductsRaw(): Promise<Product[]> {
   try {
-    const res = await fetch(FEED_URL, { next: { revalidate: 300 } })
+    const res = await fetch(FEED_URL, { cache: 'no-store' })
     if (!res.ok) throw new Error(`Feed ${res.status}`)
 
     const xml = await res.text()
@@ -148,6 +149,13 @@ export async function fetchProducts(): Promise<Product[]> {
     return []
   }
 }
+
+// Cache the parsed JS array (small) instead of the raw 21MB XML response
+export const fetchProducts = unstable_cache(
+  fetchProductsRaw,
+  ['sendeti-feed-products'],
+  { revalidate: 300 }
+)
 
 export async function getProductsByCategory(slug: string): Promise<Product[]> {
   const all = await fetchProducts()
