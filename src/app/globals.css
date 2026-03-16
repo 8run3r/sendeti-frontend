@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Figtree:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@400;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,124 +6,76 @@
 
 @layer base {
   :root {
-    /* PRIMARY — pink/rose-purple */
-    --primary:      #C874D9;
-    --primary-dark: #a855c7;
-    --primary-light:#F5E6F8;
-    /* ACCENT — orange/coral (contrast to pink) */
-    --orange:       #F7A072;
-    --orange-dark:  #e8875a;
-    --orange-light: #FFF0EB;
-    /* SUPPORTING */
-    --pink:         #E1BBC9;
-    --pink-light:   #FBF0F4;
-    --mint:         #E2FCEF;
-    --mint-dark:    #52C97E;
-    --dark:         #1a1a1a;
+    --coral:   #F7A072;
+    --coral-d: #e8875a;
+    --coral-l: #FFF0EB;
+    --purple:  #C874D9;
+    --purple-d:#a855c7;
+    --purple-l:#F5E6F8;
+    --pink:    #E1BBC9;
+    --pink-l:  #FBF0F4;
+    --mint:    #E2FCEF;
+    --mint-d:  #52C97E;
+    --dark:    #1a1a1a;
   }
 
-  html {
-    font-family: "Figtree", sans-serif;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    @apply bg-white text-neutral-900;
-    font-family: "Figtree", sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
+  html { font-family: "Nunito", sans-serif; scroll-behavior: smooth; }
+  body { @apply bg-white text-neutral-900; -webkit-font-smoothing: antialiased; }
   * { box-sizing: border-box; }
 
-  h1, h2, h3, h4 {
-    font-family: "Cormorant Garamond", Georgia, serif;
+  h1,h2,h3,h4 {
+    font-family: "Playfair Display", Georgia, serif;
     letter-spacing: -0.01em;
   }
 
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: var(--pink-light); }
-  ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--pink-l); }
+  ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: "Cormorant Garamond", Georgia, serif;
-  }
-  /* prices use Figtree 800 — clean and bold */
-  .font-mono-price {
-    font-family: "Figtree", sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
+  .font-display { font-family: "Playfair Display", Georgia, serif; }
+  .font-body { font-family: "Nunito", sans-serif; }
+  .font-mono-price { font-family: "Nunito", sans-serif; font-weight: 800; letter-spacing: -0.02em; }
+
   .dot-grid {
-    background-image: radial-gradient(circle, rgba(200,116,217,0.10) 1.5px, transparent 1.5px);
+    background-image: radial-gradient(circle, rgba(200,116,217,0.08) 1.5px, transparent 1.5px);
     background-size: 24px 24px;
   }
-  /* Pink → Orange: the core brand gradient */
-  .gradient-brand {
-    background: linear-gradient(135deg, var(--primary), var(--orange));
-  }
-  .text-gradient-brand {
-    background: linear-gradient(135deg, var(--primary), var(--orange));
+  .gradient-brand { background: linear-gradient(135deg, var(--purple), var(--coral)); }
+  .text-gradient {
+    background: linear-gradient(135deg, var(--purple), var(--coral));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-    border: none;
-    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(200,116,217,0.35);
-  }
-  .btn-accent {
-    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-    color: white;
-    border: none;
-    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .btn-accent:hover {
-    background: linear-gradient(135deg, var(--orange-dark), var(--primary));
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(247,160,114,0.35);
-  }
 }
 
-@keyframes orbit {
-  from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
-  to   { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
-}
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
 }
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-@keyframes ripple {
-  to { transform: scale(4); opacity: 0; }
-}
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
 }
 
-.animate-marquee         { animation: marquee 30s linear infinite; }
+.animate-marquee { animation: marquee 30s linear infinite; }
 .animate-marquee-reverse { animation: marquee 30s linear infinite reverse; }
-.animate-orbit           { animation: orbit 8s linear infinite; }
+.animate-orbit { animation: orbit 8s linear infinite; }
 
 .scroll-progress {
-  position: fixed;
-  top: 0; left: 0;
-  height: 3px;
-  /* pink → orange: the brand contrast gradient */
-  background: linear-gradient(90deg, var(--primary), var(--orange));
-  z-index: 9999;
-  transition: width 0.1s linear;
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--coral));
+  z-index: 9999; transition: width 0.1s linear;
 }

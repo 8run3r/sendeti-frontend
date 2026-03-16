@@ -1,165 +1,138 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  ShoppingCart,
-  Heart,
-  Truck,
-  RotateCcw,
-  Shield,
-  Check,
-  Minus,
-  Plus,
-  ExternalLink,
-} from "lucide-react";
-import type { FeedProduct } from "@/lib/feed";
-import { formatFeedPrice, feedToProduct } from "@/lib/feed";
-import { useCartStore } from "@/store/cartStore";
-import { useWishlistStore } from "@/store/wishlistStore";
-import { showToast } from "@/components/ui/Toast";
-import { RippleButton } from "@/components/ui/RippleButton";
+'use client'
 
-interface Props {
-  product: FeedProduct;
-}
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ShoppingCart, Heart, ExternalLink, Truck, RotateCcw, Shield, Check, Minus, Plus } from 'lucide-react'
+import type { Product } from '@/lib/feed'
+import { formatPrice } from '@/lib/feed'
+import { useCartStore } from '@/store/cartStore'
+import { useWishlistStore } from '@/store/wishlistStore'
+import { showToast } from '@/components/ui/Toast'
 
-const deliveryInfo = [
-  { icon: Truck, text: "Doprava od 2,90 € | Zadarmo nad 35 €" },
-  { icon: RotateCcw, text: "Vrátenie tovaru do 14 dní" },
-  { icon: Shield, text: "Certifikované a bezpečné produkty" },
-  { icon: Check, text: "Doručenie do 2–3 pracovných dní" },
-];
+export function FeedProductDetail({ product }: { product: Product }) {
+  const [activeImg, setActiveImg] = useState(0)
+  const [qty, setQty] = useState(1)
+  const [sticky, setSticky] = useState(false)
+  const btnRef = useRef<HTMLDivElement>(null)
 
-export function FeedProductDetail({ product }: Props) {
-  const [activeImage, setActiveImage] = useState(0);
-  const [qty, setQty] = useState(1);
-  const [stickyVisible, setStickyVisible] = useState(false);
-  const addButtonRef = useRef<HTMLDivElement>(null);
+  const addItem = useCartStore(s => s.addItem)
+  const openDrawer = useCartStore(s => s.openDrawer)
+  const toggle = useWishlistStore(s => s.toggle)
+  const isWished = useWishlistStore(s => s.hasItem(product.id))
 
-  const addItem = useCartStore((s) => s.addItem);
-  const openDrawer = useCartStore((s) => s.openDrawer);
-  const toggleWishlist = useWishlistStore((s) => s.toggle);
-  const isWishlisted = useWishlistStore((s) => s.hasItem(product.id));
-
-  const discount =
-    product.originalPrice && product.originalPrice > product.price
-      ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) * 100
-        )
-      : undefined;
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : undefined
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setStickyVisible(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    if (addButtonRef.current) observer.observe(addButtonRef.current);
-    return () => observer.disconnect();
-  }, []);
+    const obs = new IntersectionObserver(([e]) => setSticky(!e.isIntersecting), { threshold: 0 })
+    if (btnRef.current) obs.observe(btnRef.current)
+    return () => obs.disconnect()
+  }, [])
 
-  const handleAddToCart = () => {
-    if (!product.inStock) return;
-    addItem(feedToProduct(product), qty);
-    showToast(`${product.name.slice(0, 28)}… pridaný do košíka`);
-    openDrawer();
-  };
+  const handleCart = () => {
+    if (!product.inStock) return
+    addItem(product, qty)
+    showToast(`✓ Pridané do košíka`)
+    openDrawer()
+  }
+
+  const deliveryItems: Array<{ icon: React.ElementType; text: string }> = [
+    { icon: Truck, text: 'Doprava od 2,90 € | Zadarmo nad 35 €' },
+    { icon: RotateCcw, text: 'Vrátenie tovaru do 14 dní' },
+    { icon: Shield, text: 'Certifikované a bezpečné produkty' },
+    { icon: Check, text: 'Doručenie do 2–3 pracovných dní' },
+  ]
 
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
-      <div className="border-b border-pink py-3 px-4">
-        <div className="max-w-content mx-auto">
-          <nav className="flex items-center gap-2 text-sm text-neutral-400 flex-wrap">
-            <Link href="/" className="hover:text-primary transition-colors">Domov</Link>
-            <span>/</span>
-            <Link
-              href={`/kategoria/${product.categorySlug}`}
-              className="hover:text-primary transition-colors capitalize"
-            >
-              {product.category}
-            </Link>
-            <span>/</span>
-            <span className="text-neutral-700 font-medium line-clamp-1">{product.name}</span>
-          </nav>
+      <div className="py-3 px-4" style={{ borderBottom: '1px solid #E1BBC9' }}>
+        <div className="max-w-content mx-auto flex items-center gap-2 text-xs text-neutral-400 flex-wrap">
+          <Link href="/" className="hover:text-primary transition-colors font-semibold">Domov</Link>
+          <span>/</span>
+          <Link href={`/kategoria/${product.categorySlug}`} className="hover:text-primary transition-colors font-semibold">
+            {product.category}
+          </Link>
+          <span>/</span>
+          <span className="text-neutral-600 font-bold line-clamp-1">{product.name}</span>
         </div>
       </div>
 
-      <div className="max-w-content mx-auto px-4 py-8">
+      <div className="max-w-content mx-auto px-4 py-10">
         <div className="grid lg:grid-cols-2 gap-12">
-
-          {/* ── Image gallery ── */}
+          {/* Gallery */}
           <div>
             <div className="relative aspect-square rounded-3xl overflow-hidden bg-pink-light mb-4">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeImage}
+                  key={activeImg}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="absolute inset-0"
                 >
                   <Image
-                    src={product.images[activeImage] ?? product.image}
+                    src={product.images[activeImg] ?? product.image}
                     alt={product.name}
                     fill
                     priority
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    sizes="(max-width:1024px) 100vw, 50vw"
                     className="object-cover"
                   />
                 </motion.div>
               </AnimatePresence>
-
               {discount && (
-                <div className="absolute top-4 left-4 z-10 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
+                <div
+                  className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-sm font-black text-white"
+                  style={{ background: 'linear-gradient(135deg,#F7A072,#e8875a)' }}
+                >
                   -{discount}%
                 </div>
               )}
             </div>
-
             {product.images.length > 1 && (
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex gap-2 flex-wrap">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all ${
-                      activeImage === i ? "border-primary" : "border-pink"
-                    }`}
+                    onClick={() => setActiveImg(i)}
+                    className="relative w-16 h-16 rounded-2xl overflow-hidden transition-all"
+                    style={{ border: `2px solid ${activeImg === i ? '#C874D9' : '#E1BBC9'}` }}
                   >
-                    <Image src={img} alt="" fill sizes="80px" className="object-cover" />
+                    <Image src={img} alt="" fill sizes="64px" className="object-cover" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* ── Product info ── */}
+          {/* Info */}
           <div className="lg:sticky lg:top-24 self-start">
-            <p className="text-sm text-neutral-400 mb-2 capitalize">{product.category}</p>
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-neutral-900 mb-3 leading-tight">
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">
+              {product.category}
+            </p>
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-neutral-900 leading-tight mb-4">
               {product.name}
             </h1>
 
-            {product.brand && (
-              <p className="text-sm text-neutral-400 mb-4">
-                Značka: <span className="font-semibold text-neutral-600">{product.brand}</span>
-              </p>
-            )}
-
-            {/* Price — orange for contrast against pink UI */}
-            <div className="flex items-center gap-3 mb-4">
-              <span className="font-mono-price text-3xl text-accent-dark">
-                {formatFeedPrice(product.price)}
+            {/* Price */}
+            <div className="flex items-baseline gap-3 mb-5">
+              <span className="font-mono-price text-3xl" style={{ color: '#F7A072' }}>
+                {formatPrice(product.price)}
               </span>
               {product.originalPrice && (
                 <>
                   <span className="text-lg text-neutral-300 line-through font-mono-price">
-                    {formatFeedPrice(product.originalPrice)}
+                    {formatPrice(product.originalPrice)}
                   </span>
                   {discount && (
-                    <span className="text-sm font-bold text-white bg-accent px-2.5 py-0.5 rounded-full">
+                    <span
+                      className="text-sm font-black px-2 py-0.5 rounded-full text-white"
+                      style={{ background: '#F7A072' }}
+                    >
                       -{discount}%
                     </span>
                   )}
@@ -167,79 +140,77 @@ export function FeedProductDetail({ product }: Props) {
               )}
             </div>
 
-            {/* Stock indicator */}
+            {/* Stock */}
             <div className="flex items-center gap-2 mb-6">
               <span
-                className={`inline-block w-2.5 h-2.5 rounded-full ${
-                  product.inStock ? "bg-mint-dark" : "bg-red-400"
-                }`}
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                style={{ background: product.inStock ? '#52C97E' : '#f87171' }}
               />
-              <span className="text-sm font-medium text-neutral-600">
-                {product.inStock ? "Skladom — pripravené na odoslanie" : "Momentálne nedostupné"}
+              <span className="text-sm font-semibold text-neutral-600">
+                {product.inStock ? 'Skladom — pripravené na odoslanie' : 'Momentálne nedostupné'}
               </span>
             </div>
 
-            {/* Quantity selector + Add to cart */}
-            <div ref={addButtonRef} className="flex gap-3 mb-5">
-              {/* Qty */}
-              <div className="flex items-center bg-neutral-100 rounded-xl border border-pink">
+            {/* Qty + Add */}
+            <div ref={btnRef} className="flex gap-3 mb-4">
+              <div
+                className="flex items-center rounded-xl"
+                style={{ border: '2px solid #E1BBC9' }}
+              >
                 <button
                   onClick={() => setQty(Math.max(1, qty - 1))}
-                  className="p-3 hover:bg-pink-light rounded-l-xl transition-colors"
+                  className="p-3 hover:text-primary transition-colors"
                 >
-                  <Minus size={15} />
+                  <Minus size={14} />
                 </button>
                 <span className="w-10 text-center font-bold text-sm">{qty}</span>
                 <button
                   onClick={() => setQty(qty + 1)}
-                  className="p-3 hover:bg-pink-light rounded-r-xl transition-colors"
+                  className="p-3 hover:text-primary transition-colors"
                 >
-                  <Plus size={15} />
+                  <Plus size={14} />
                 </button>
               </div>
 
-              {/* Add to cart */}
-              <RippleButton
-                onClick={handleAddToCart}
+              <motion.button
+                onClick={handleCart}
                 disabled={!product.inStock}
-                className="flex-1 h-12 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                whileTap={{ scale: 0.97 }}
+                className="flex-1 h-12 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg,#C874D9,#a855c7)' }}
               >
-                <ShoppingCart size={17} />
+                <ShoppingCart size={16} />
                 Pridať do košíka
-              </RippleButton>
+              </motion.button>
 
-              {/* Wishlist */}
-              <button
-                onClick={() => {
-                  toggleWishlist(product.id);
-                  showToast(isWishlisted ? "Odstránené z obľúbených" : "Pridané do obľúbených");
-                }}
-                className="w-12 h-12 border-2 border-pink rounded-xl flex items-center justify-center hover:border-primary transition-colors"
+              <motion.button
+                onClick={() => { toggle(product.id); showToast(isWished ? 'Odstránené' : '♡ Pridané do obľúbených') }}
+                whileTap={{ scale: 1.2 }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                style={{ border: '2px solid #E1BBC9', background: isWished ? '#F5E6F8' : 'transparent' }}
               >
-                <Heart
-                  size={19}
-                  className={isWishlisted ? "fill-primary text-primary" : "text-neutral-400"}
-                />
-              </button>
+                <Heart size={18} className={isWished ? 'fill-primary text-primary' : 'text-neutral-400'} />
+              </motion.button>
             </div>
 
-            {/* Also buy directly on sendeti.sk */}
+            {/* Direct buy */}
             <a
-              href={product.url}
+              href={product.shopUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full h-10 border-2 border-pink text-sm font-semibold text-neutral-600 rounded-xl hover:border-primary hover:text-primary transition-colors mb-6"
+              className="flex w-full h-11 rounded-xl items-center justify-center gap-2 text-sm font-bold transition-all hover:opacity-80 mb-6"
+              style={{ background: 'linear-gradient(135deg,#F7A072,#e8875a)', color: 'white' }}
             >
               <ExternalLink size={14} />
-              Kúpiť priamo na sendeti.sk
+              🛒 Kúpiť na sendeti.sk →
             </a>
 
             {/* Delivery info */}
-            <div className="bg-mint rounded-2xl p-4 space-y-3">
-              {deliveryInfo.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm text-neutral-600">
-                  <item.icon size={15} className="text-mint-dark flex-shrink-0" />
-                  {item.text}
+            <div className="rounded-2xl p-4 space-y-3" style={{ background: '#E2FCEF' }}>
+              {deliveryItems.map(({ icon: Icon, text }, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm font-semibold text-neutral-600">
+                  <Icon size={14} className="text-mint-dark flex-shrink-0" />
+                  {text}
                 </div>
               ))}
             </div>
@@ -249,42 +220,45 @@ export function FeedProductDetail({ product }: Props) {
         {/* Description */}
         {product.description && (
           <div className="mt-16 max-w-2xl">
-            <h2 className="font-display text-2xl font-bold text-neutral-900 mb-4">
-              Popis produktu
-            </h2>
-            <p className="text-neutral-600 leading-relaxed whitespace-pre-line">
+            <h2 className="font-display text-2xl font-bold text-neutral-900 mb-4">Popis produktu</h2>
+            <p className="text-neutral-600 leading-relaxed whitespace-pre-line font-body">
               {product.description}
             </p>
           </div>
         )}
       </div>
 
-      {/* Sticky add-to-cart bar */}
+      {/* Sticky bar */}
       <AnimatePresence>
-        {stickyVisible && (
+        {sticky && (
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t border-pink shadow-lg px-4 py-3 z-40"
+            className="fixed bottom-0 left-0 right-0 bg-white px-4 py-3 z-40"
+            style={{ borderTop: '1px solid #E1BBC9', boxShadow: '0 -8px 32px rgba(0,0,0,0.08)' }}
           >
-            <div className="max-w-content mx-auto flex items-center justify-between gap-4">
+            <div className="max-w-content mx-auto flex items-center gap-4">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-neutral-900 line-clamp-1">{product.name}</p>
-                <span className="font-mono-price text-accent-dark">{formatFeedPrice(product.price)}</span>
+                <p className="text-sm font-bold text-neutral-900 line-clamp-1">{product.name}</p>
+                <span className="font-mono-price text-base" style={{ color: '#F7A072' }}>
+                  {formatPrice(product.price)}
+                </span>
               </div>
-              <RippleButton
-                onClick={handleAddToCart}
+              <motion.button
+                onClick={handleCart}
                 disabled={!product.inStock}
-                className="h-11 px-6 bg-primary text-white font-bold rounded-xl flex items-center gap-2 whitespace-nowrap hover:bg-primary-dark transition-colors disabled:opacity-40"
+                whileTap={{ scale: 0.97 }}
+                className="h-11 px-6 rounded-xl font-bold text-white text-sm flex items-center gap-2 disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg,#C874D9,#a855c7)' }}
               >
-                <ShoppingCart size={16} />
+                <ShoppingCart size={15} />
                 Pridať do košíka
-              </RippleButton>
+              </motion.button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

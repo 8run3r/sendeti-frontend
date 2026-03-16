@@ -13,6 +13,7 @@ import { useWishlistStore } from "@/store/wishlistStore";
 import { formatPrice } from "@/lib/formatPrice";
 import { showToast } from "@/components/ui/Toast";
 import type { Product } from "@/types";
+import type { Product as FeedProduct } from "@/lib/feed";
 
 interface Props {
   product: Product;
@@ -30,7 +31,24 @@ export function ProductCard({ product }: Props) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    addItem(product, 1);
+    // Adapt legacy Product type to feed Product shape
+    const feedProduct: FeedProduct = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: product.images[0] ?? '',
+      images: product.images,
+      url: `https://www.sendeti.sk/produkt/${product.slug}`,
+      shopUrl: `https://www.sendeti.sk/produkt/${product.slug}`,
+      category: product.category,
+      categorySlug: product.category,
+      description: product.description,
+      inStock: product.inStock,
+      badge: (product.badge === 'bestseller' ? 'popular' : product.badge) as FeedProduct['badge'],
+    }
+    addItem(feedProduct, 1);
     showToast(`${product.name.slice(0, 30)}... pridaný do košíka`);
     openDrawer();
   };

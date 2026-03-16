@@ -69,7 +69,7 @@ export default function CartPage() {
             <AnimatePresence>
               {items.map((item) => (
                 <motion.div
-                  key={`${item.product.id}-${item.selectedSize}`}
+                  key={item.product.id}
                   layout
                   exit={{ opacity: 0, x: -20, height: 0 }}
                   className="bg-white rounded-2xl p-5 flex gap-4"
@@ -83,8 +83,6 @@ export default function CartPage() {
                         {item.product.name}
                       </h3>
                     </Link>
-                    {item.selectedSize && <p className="text-sm text-neutral-500 mb-1">Veľkosť: {item.selectedSize}</p>}
-                    {item.selectedColor && <p className="text-sm text-neutral-500 mb-2">Farba: {item.selectedColor}</p>}
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div className="flex items-center bg-neutral-100 rounded-xl">
                         <button onClick={() => updateQty(item.product.id, item.quantity - 1)} className="p-2.5 hover:bg-neutral-200 rounded-l-xl transition-colors">

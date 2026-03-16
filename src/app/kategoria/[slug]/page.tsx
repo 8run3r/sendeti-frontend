@@ -1,113 +1,87 @@
-"use client";
-import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ChevronDown, SlidersHorizontal, Grid, List, X } from "lucide-react";
-import { categories } from "@/data/categories";
-import { FeedProductCard } from "@/components/product/FeedProductCard";
-import type { FeedProduct } from "@/lib/feed";
+'use client'
 
-type SortOption = "popular" | "price-asc" | "price-desc" | "newest";
+import { useState, useMemo, useEffect } from 'react'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useParams } from 'next/navigation'
+import { SlidersHorizontal, Grid, List, ChevronDown } from 'lucide-react'
+import { FeedProductCard } from '@/components/product/FeedProductCard'
+import type { Product } from '@/lib/feed'
 
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: "popular", label: "Najpopulárnejšie" },
-  { value: "price-asc", label: "Cena: najnižšia" },
-  { value: "price-desc", label: "Cena: najvyššia" },
-  { value: "newest", label: "Najnovšie" },
-];
+type Sort = 'default' | 'price-asc' | 'price-desc'
+
+const sortOpts: { value: Sort; label: string }[] = [
+  { value: 'default', label: 'Najpopulárnejšie' },
+  { value: 'price-asc', label: 'Cena: najnižšia' },
+  { value: 'price-desc', label: 'Cena: najvyššia' },
+]
+
+const CATEGORY_NAMES: Record<string, string> = {
+  'bytovy-textil': 'Bytový textil',
+  'oblecenie': 'Oblečenie',
+  'hracky': 'Hračky',
+  'skolske-potreby': 'Školské potreby',
+  'kojenecke': 'Kojenecké',
+  'kuchyna': 'Kuchyňa',
+  'party': 'Party & Darčeky',
+  'doplnky': 'Doplnky',
+}
 
 export default function CategoryPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const category = categories.find((c) => c.id === slug);
+  const params = useParams()
+  const slug = params.slug as string
+  const categoryName = CATEGORY_NAMES[slug] ?? slug
 
-  const [allProducts, setAllProducts] = useState<FeedProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 250]);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [sort, setSort] = useState<SortOption>("popular");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [gridView, setGridView] = useState(true);
-  const [showAll, setShowAll] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [all, setAll] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [maxPrice, setMaxPrice] = useState(250)
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [sort, setSort] = useState<Sort>('default')
+  const [gridView, setGridView] = useState(true)
+  const [showAll, setShowAll] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    setLoading(true);
-    fetch("/api/feed")
-      .then((r) => r.json())
-      .then((data: FeedProduct[]) => {
-        const categoryProducts =
-          slug === "vsetky"
-            ? data
-            : data.filter((p) => p.categorySlug === slug);
-        setAllProducts(categoryProducts);
-        setLoading(false);
+    setLoading(true)
+    setShowAll(false)
+    fetch('/api/feed')
+      .then(r => r.json())
+      .then((data: Product[]) => {
+        const filtered = slug === 'vsetky' ? data : data.filter(p => p.categorySlug === slug)
+        setAll(filtered)
+        setLoading(false)
       })
-      .catch(() => setLoading(false));
-  }, [slug]);
+      .catch(() => setLoading(false))
+  }, [slug])
 
   const filtered = useMemo(() => {
-    let result = allProducts;
+    let r = all.filter(p => p.price <= maxPrice)
+    if (inStockOnly) r = r.filter(p => p.inStock)
+    if (sort === 'price-asc') r = [...r].sort((a, b) => a.price - b.price)
+    if (sort === 'price-desc') r = [...r].sort((a, b) => b.price - a.price)
+    return r
+  }, [all, maxPrice, inStockOnly, sort])
 
-    if (inStockOnly) result = result.filter((p) => p.inStock);
-    result = result.filter(
-      (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
-    );
-
-    switch (sort) {
-      case "price-asc":
-        result = [...result].sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        result = [...result].sort((a, b) => b.price - a.price);
-        break;
-      default:
-        break;
-    }
-
-    return result;
-  }, [allProducts, inStockOnly, priceRange, sort]);
-
-  const displayed = showAll ? filtered : filtered.slice(0, 12);
-
-  const removeFilter = (filter: string) => {
-    setActiveFilters((prev) => prev.filter((f) => f !== filter));
-    if (filter === "Iba skladom") setInStockOnly(false);
-    if (filter.startsWith("Max. cena")) setPriceRange([0, 250]);
-  };
-
-  const addFilter = (label: string) => {
-    setActiveFilters((prev) => (prev.includes(label) ? prev : [...prev, label]));
-  };
+  const displayed = showAll ? filtered : filtered.slice(0, 12)
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Category banner */}
+      {/* Banner */}
       <div
-        className="relative py-16 px-4"
-        style={{
-          background: category
-            ? `linear-gradient(135deg, ${category.color} 0%, white 100%)`
-            : "#EBF4FF",
-        }}
+        className="py-14 px-4"
+        style={{ background: 'linear-gradient(135deg, #F5E6F8 0%, white 70%)' }}
       >
         <div className="max-w-content mx-auto">
-          <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
-            <Link href="/" className="hover:text-primary">
-              Domov
-            </Link>
+          <nav className="flex items-center gap-2 text-xs font-semibold text-neutral-400 mb-3">
+            <Link href="/" className="hover:text-primary transition-colors">Domov</Link>
             <span>/</span>
-            <span className="text-neutral-900 font-medium">
-              {category?.name ?? slug}
-            </span>
+            <span className="text-neutral-700">{categoryName}</span>
           </nav>
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-2">
-            {category?.name ?? slug}
+          <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-1">
+            {categoryName}
           </h1>
-          <p className="text-neutral-600">
-            {loading ? "Načítavam..." : `${filtered.length} produktov`}
+          <p className="font-body text-neutral-500">
+            {loading ? 'Načítavam...' : `${filtered.length} produktov`}
           </p>
         </div>
       </div>
@@ -115,187 +89,115 @@ export default function CategoryPage() {
       <div className="max-w-content mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Sidebar */}
-          <aside
-            className={`${sidebarOpen ? "block" : "hidden"} lg:block w-64 flex-shrink-0`}
-          >
-            <div className="bg-white rounded-2xl border border-neutral-100 p-6 sticky top-24 space-y-6">
-              <h3 className="font-semibold text-neutral-900">Filtre</h3>
+          <aside className={`${sidebarOpen ? 'block' : 'hidden'} lg:block w-60 flex-shrink-0`}>
+            <div
+              className="rounded-2xl p-5 sticky top-24 space-y-5"
+              style={{ border: '1px solid #E1BBC9' }}
+            >
+              <h3 className="font-display text-lg font-bold text-neutral-900">Filtre</h3>
 
-              {/* Price range */}
               <div>
-                <h4 className="text-sm font-semibold text-neutral-700 mb-3">
-                  Cena
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-neutral-600">
-                    <span>{priceRange[0]} €</span>
-                    <span>{priceRange[1]} €</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={250}
-                    value={priceRange[1]}
-                    onChange={(e) => {
-                      setPriceRange([priceRange[0], Number(e.target.value)]);
-                      addFilter(`Max. cena ${e.target.value}€`);
-                    }}
-                    className="w-full accent-primary"
-                  />
+                <p className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-2">Cena</p>
+                <div className="flex justify-between text-sm font-semibold mb-2">
+                  <span>0 €</span><span>{maxPrice} €</span>
                 </div>
-              </div>
-
-              {/* Availability */}
-              <div>
-                <h4 className="text-sm font-semibold text-neutral-700 mb-3">
-                  Dostupnosť
-                </h4>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={inStockOnly}
-                    onChange={(e) => {
-                      setInStockOnly(e.target.checked);
-                      if (e.target.checked) addFilter("Iba skladom");
-                      else removeFilter("Iba skladom");
-                    }}
-                    className="w-4 h-4 accent-primary rounded"
-                  />
-                  <span className="text-sm text-neutral-700">Iba skladom</span>
-                </label>
-              </div>
-
-              {/* Subcategories */}
-              {category && (
-                <div>
-                  <h4 className="text-sm font-semibold text-neutral-700 mb-3">
-                    Podkategórie
-                  </h4>
-                  <div className="space-y-1">
-                    {category.subcategories.map((sub) => (
-                      <Link
-                        key={sub.id}
-                        href={`/kategoria/${slug}/${sub.id}`}
-                        className="flex justify-between items-center text-sm text-neutral-600 hover:text-primary px-3 py-2 rounded-xl hover:bg-primary-light transition-colors"
-                      >
-                        {sub.name}
-                        <span className="text-xs text-neutral-400">
-                          {sub.productCount}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </aside>
-
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-neutral-200 rounded-xl text-sm"
-              >
-                <SlidersHorizontal size={16} />
-                Filtre
-              </button>
-
-              {/* Active filters */}
-              <div className="flex flex-wrap gap-2 flex-1">
-                {activeFilters.map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => removeFilter(f)}
-                    className="flex items-center gap-1 bg-primary-light text-primary px-3 py-1 rounded-full text-xs font-semibold"
-                  >
-                    {f} <X size={12} />
-                  </button>
-                ))}
-              </div>
-
-              {/* Sort */}
-              <div className="relative">
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as SortOption)}
-                  className="h-10 pl-4 pr-8 bg-white border border-neutral-200 rounded-xl text-sm outline-none cursor-pointer appearance-none"
-                >
-                  {sortOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={14}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400"
+                <input
+                  type="range" min={0} max={250} value={maxPrice}
+                  onChange={e => setMaxPrice(+e.target.value)}
+                  className="w-full accent-primary"
                 />
               </div>
 
-              {/* Grid/List toggle */}
-              <div className="flex items-center border border-neutral-200 rounded-xl overflow-hidden">
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-2">Dostupnosť</p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox" checked={inStockOnly}
+                    onChange={e => setInStockOnly(e.target.checked)}
+                    className="w-4 h-4 accent-primary rounded"
+                  />
+                  <span className="text-sm font-semibold text-neutral-700">Iba skladom</span>
+                </label>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold"
+                style={{ border: '1px solid #E1BBC9' }}
+              >
+                <SlidersHorizontal size={14} /> Filtre
+              </button>
+
+              <div className="flex-1" />
+
+              <div className="relative">
+                <select
+                  value={sort}
+                  onChange={e => setSort(e.target.value as Sort)}
+                  className="h-9 pl-3 pr-8 rounded-xl text-sm font-semibold outline-none appearance-none cursor-pointer"
+                  style={{ border: '1px solid #E1BBC9' }}
+                >
+                  {sortOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400" />
+              </div>
+
+              <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid #E1BBC9' }}>
                 <button
                   onClick={() => setGridView(true)}
-                  className={`p-2.5 transition-colors ${gridView ? "bg-primary text-white" : "text-neutral-400 hover:bg-neutral-50"}`}
+                  className="p-2 transition-colors"
+                  style={{ background: gridView ? '#C874D9' : 'transparent', color: gridView ? 'white' : '#9ca3af' }}
                 >
-                  <Grid size={16} />
+                  <Grid size={15} />
                 </button>
                 <button
                   onClick={() => setGridView(false)}
-                  className={`p-2.5 transition-colors ${!gridView ? "bg-primary text-white" : "text-neutral-400 hover:bg-neutral-50"}`}
+                  className="p-2 transition-colors"
+                  style={{ background: !gridView ? '#C874D9' : 'transparent', color: !gridView ? 'white' : '#9ca3af' }}
                 >
-                  <List size={16} />
+                  <List size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Products */}
+            {/* Skeleton */}
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded-2xl bg-neutral-100 animate-pulse"
-                  />
+                  <div key={i} className="aspect-square rounded-3xl bg-neutral-100 animate-pulse" />
                 ))}
               </div>
             ) : (
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${sort}-${inStockOnly}-${priceRange[1]}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className={
-                    gridView
-                      ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
-                      : "flex flex-col gap-4"
-                  }
+                  key={`${sort}-${inStockOnly}-${maxPrice}`}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className={gridView
+                    ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4'
+                    : 'flex flex-col gap-4'}
                 >
                   {displayed.length === 0 ? (
-                    <div className="col-span-full text-center py-16">
-                      <p className="text-4xl mb-4">🔍</p>
-                      <p className="font-semibold text-neutral-900 mb-2">
-                        Žiadne produkty nenájdené
-                      </p>
-                      <p className="text-sm text-neutral-500">
-                        Skúste upraviť filtre
-                      </p>
+                    <div className="col-span-full text-center py-20">
+                      <p className="text-5xl mb-4">🔍</p>
+                      <p className="font-display text-xl font-bold text-neutral-900 mb-2">Žiadne produkty</p>
+                      <p className="text-sm text-neutral-400">Skúste upraviť filtre</p>
                     </div>
-                  ) : (
-                    displayed.map((product, i) => (
-                      <motion.div
-                        key={product.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                      >
-                        <FeedProductCard product={product} />
-                      </motion.div>
-                    ))
-                  )}
+                  ) : displayed.map((p, i) => (
+                    <motion.div
+                      key={p.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03 }}
+                    >
+                      <FeedProductCard product={p} />
+                    </motion.div>
+                  ))}
                 </motion.div>
               </AnimatePresence>
             )}
@@ -304,7 +206,16 @@ export default function CategoryPage() {
               <div className="text-center mt-10">
                 <button
                   onClick={() => setShowAll(true)}
-                  className="px-8 py-3 border-2 border-primary text-primary font-semibold rounded-2xl hover:bg-primary hover:text-white transition-all"
+                  className="px-8 py-3 rounded-2xl font-bold text-sm transition-all"
+                  style={{ border: '2px solid #C874D9', color: '#C874D9' }}
+                  onMouseEnter={e => {
+                    (e.target as HTMLButtonElement).style.background = '#C874D9'
+                    ;(e.target as HTMLButtonElement).style.color = 'white'
+                  }}
+                  onMouseLeave={e => {
+                    (e.target as HTMLButtonElement).style.background = 'transparent'
+                    ;(e.target as HTMLButtonElement).style.color = '#C874D9'
+                  }}
                 >
                   Načítať viac ({filtered.length - 12} ďalších)
                 </button>
@@ -314,5 +225,5 @@ export default function CategoryPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

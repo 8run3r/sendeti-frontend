@@ -1,8 +1,9 @@
 import { XMLParser } from 'fast-xml-parser'
 
-const FEED_URL = 'https://www.sendeti.sk/fotky46145/xml/google_nakupy.xml'
+const FEED_URL = process.env.FEED_URL ||
+  'https://www.sendeti.sk/fotky46145/xml/google_nakupy.xml'
 
-export interface FeedProduct {
+export interface Product {
   id: string
   name: string
   slug: string
@@ -11,211 +12,167 @@ export interface FeedProduct {
   image: string
   images: string[]
   url: string
+  shopUrl: string
   category: string
   categorySlug: string
   description: string
   inStock: boolean
-  brand?: string
+  badge?: 'sale' | 'new' | 'popular'
 }
 
-// Feed uses uppercase categories — match case-insensitively
-const CATEGORY_MAP: Record<string, string> = {
-  'bytový textil': 'bytovy-textil',
-  'oblečenie': 'oblecenie',
-  'hračky': 'hracky',
-  'školské potreby': 'skolske-potreby',
-  'kojenecké': 'kojenecke',
-  'kuchyňa': 'kuchyna',
-  'party': 'party',
-  'doplnky': 'doplnky',
+// Backward-compat alias used by HeroSection
+export type FeedProduct = Product
+
+const CATEGORY_MAP: Record<string, { slug: string; name: string }> = {
+  'bytový textil': { slug: 'bytovy-textil', name: 'Bytový textil' },
+  'obliečky':      { slug: 'bytovy-textil', name: 'Bytový textil' },
+  'plachty':       { slug: 'bytovy-textil', name: 'Bytový textil' },
+  'oblečenie':     { slug: 'oblecenie',     name: 'Oblečenie' },
+  'tričká':        { slug: 'oblecenie',     name: 'Oblečenie' },
+  'pyžamá':        { slug: 'oblecenie',     name: 'Oblečenie' },
+  'hračky':        { slug: 'hracky',        name: 'Hračky' },
+  'školské':       { slug: 'skolske-potreby', name: 'Školské potreby' },
+  'kojeneck':      { slug: 'kojenecke',     name: 'Kojenecké' },
+  'kuchyňa':       { slug: 'kuchyna',       name: 'Kuchyňa' },
+  'party':         { slug: 'party',         name: 'Party & Darčeky' },
+  'doplnky':       { slug: 'doplnky',       name: 'Doplnky' },
 }
 
-function slugify(text: string): string {
-  return text
+function getCategoryInfo(category: string) {
+  const lower = category.toLowerCase()
+  for (const [key, val] of Object.entries(CATEGORY_MAP)) {
+    if (lower.includes(key)) return val
+  }
+  return { slug: 'ostatne', name: category }
+}
+
+function slugify(text: string, id: string): string {
+  const base = text
     .toLowerCase()
-    .replace(/[áä]/g, 'a')
-    .replace(/[čć]/g, 'c')
-    .replace(/[ď]/g, 'd')
-    .replace(/[éě]/g, 'e')
-    .replace(/[í]/g, 'i')
-    .replace(/[ľĺ]/g, 'l')
-    .replace(/[ň]/g, 'n')
-    .replace(/[óô]/g, 'o')
-    .replace(/[ŕ]/g, 'r')
-    .replace(/[šś]/g, 's')
-    .replace(/[ť]/g, 't')
-    .replace(/[úů]/g, 'u')
-    .replace(/[ý]/g, 'y')
+    .replace(/[áä]/g, 'a').replace(/č/g, 'c')
+    .replace(/ď/g, 'd').replace(/[éě]/g, 'e')
+    .replace(/í/g, 'i').replace(/[ľĺ]/g, 'l')
+    .replace(/ň/g, 'n').replace(/[óô]/g, 'o')
+    .replace(/[šś]/g, 's').replace(/ť/g, 't')
+    .replace(/[úů]/g, 'u').replace(/ý/g, 'y')
     .replace(/[žź]/g, 'z')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+  return `${base}-${id}`
 }
 
-/**
- * Parse "29,50 EUR" → 29.50
- * The feed uses European comma decimals.
- */
+export function getShopUrl(url: string): string {
+  return url
+    .replace('http://www.sendeti.sk', 'https://www.sendeti.sk')
+}
+
+function parseCdata(val: unknown): string {
+  if (!val) return ''
+  if (typeof val === 'object' && val !== null && '__cdata' in val) {
+    return String((val as Record<string, unknown>)['__cdata'] ?? '')
+  }
+  return String(val)
+}
+
 function parsePrice(raw: unknown): number {
   if (!raw) return 0
-  const str = String(raw)
-    .replace(',', '.')   // "29,50" → "29.50"
-    .replace(/[^0-9.]/g, '') // strip "EUR", spaces, etc.
-  return parseFloat(str) || 0
+  return parseFloat(
+    String(raw).replace(',', '.').replace(/[^0-9.]/g, '')
+  ) || 0
 }
 
-export async function fetchProducts(): Promise<FeedProduct[]> {
+export async function fetchProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(FEED_URL, {
-      next: { revalidate: 300 },
-    })
-
-    if (!res.ok) throw new Error(`Feed fetch failed: ${res.status}`)
+    const res = await fetch(FEED_URL, { next: { revalidate: 300 } })
+    if (!res.ok) throw new Error(`Feed ${res.status}`)
 
     const xml = await res.text()
-
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
-      processEntities: false,  // avoids entity expansion limit on large feeds
-      cdataPropName: '__cdata', // parse CDATA sections explicitly
+      processEntities: false,
+      cdataPropName: '__cdata',
     })
 
-    const parsed = parser.parse(xml)
-
-    const channel = parsed?.rss?.channel
-    const items: unknown[] = channel?.item
-      ? Array.isArray(channel.item)
-        ? channel.item
-        : [channel.item]
-      : []
+    const data = parser.parse(xml)
+    const rawItems = data?.rss?.channel?.item ?? []
+    const items: unknown[] = Array.isArray(rawItems) ? rawItems : [rawItems]
 
     return items
       .filter(Boolean)
-      .map((item) => {
+      .map((item, index) => {
         const i = item as Record<string, unknown>
 
-        // Title — may be plain string or CDATA object
-        const titleRaw = i['g:title']
-        const name = String(
-          typeof titleRaw === 'object' && titleRaw !== null
-            ? (titleRaw as Record<string, unknown>)['__cdata'] ?? ''
-            : titleRaw ?? ''
-        ).trim()
+        const name = parseCdata(i['g:title'] ?? i['title'] ?? '')
+        const price = parsePrice(i['g:price'] ?? i['price'] ?? 0)
+        const salePriceRaw = i['g:sale_price']
+        const salePrice = salePriceRaw ? parsePrice(salePriceRaw) : undefined
 
-        // Description — may be CDATA
-        const descRaw = i['g:description']
-        const description = String(
-          typeof descRaw === 'object' && descRaw !== null
-            ? (descRaw as Record<string, unknown>)['__cdata'] ?? ''
-            : descRaw ?? ''
-        ).trim()
-
-        // Price: "29,50 EUR"
-        const price = parsePrice(i['g:price'])
-
-        // No sale_price in this feed — skip
-        const image = String(i['g:image_link'] ?? '')
-
-        // Additional images (not present in this feed, but keep for future)
-        const additionalImages = i['g:additional_image_link']
-          ? Array.isArray(i['g:additional_image_link'])
-            ? (i['g:additional_image_link'] as unknown[]).map(String)
-            : [String(i['g:additional_image_link'])]
+        const image = String(i['g:image_link'] ?? i['image_link'] ?? '')
+        const extra = i['g:additional_image_link']
+        const extraImages: string[] = extra
+          ? (Array.isArray(extra) ? extra : [extra]).map(String)
           : []
 
-        // Category — uppercase in this feed e.g. "BYTOVÝ TEXTIL "
-        const category = String(i['g:product_type'] ?? '').trim()
-        const categoryLower = category.toLowerCase()
+        const category = String(i['g:product_type'] ?? i['g:google_product_category'] ?? '')
+        const catInfo = getCategoryInfo(category)
 
-        const categorySlug =
-          Object.entries(CATEGORY_MAP).find(([key]) =>
-            categoryLower.includes(key)
-          )?.[1] ?? 'ostatne'
-
-        const url = String(i['link'] ?? '')
-        const id = String(i['g:id'] ?? slugify(name))
+        const url = String(i['link'] ?? i['g:link'] ?? '')
+        const id = String(i['g:id'] ?? i['id'] ?? index)
         const availability = String(i['g:availability'] ?? 'in stock')
+        const inStock = !availability.toLowerCase().includes('out')
+        const description = parseCdata(i['g:description'] ?? i['description'] ?? '')
+
+        const finalPrice = salePrice ?? price
 
         return {
           id,
           name,
-          slug: slugify(name) + '-' + id,
-          price,
+          slug: slugify(name, id),
+          price: finalPrice,
+          originalPrice: salePrice ? price : undefined,
           image,
-          images: [image, ...additionalImages].filter(Boolean),
+          images: [image, ...extraImages].filter(Boolean),
           url,
+          shopUrl: getShopUrl(url),
           category,
-          categorySlug,
+          categorySlug: catInfo.slug,
           description,
-          inStock: !availability.toLowerCase().includes('out'),
-          brand: String(i['g:brand'] ?? '').trim() || undefined,
-        } satisfies FeedProduct
+          inStock,
+          badge: (salePrice ? 'sale' : index < 10 ? 'new' : undefined) as Product['badge'],
+        } satisfies Product
       })
-      .filter((p) => p.name && p.price > 0 && p.image)
-  } catch (error) {
-    console.error('Feed error:', error)
+      .filter(p => p.name && p.price > 0 && p.image)
+  } catch (err) {
+    console.error('Feed error:', err)
     return []
   }
 }
 
-export async function getProductBySlug(
-  slug: string
-): Promise<FeedProduct | null> {
-  const products = await fetchProducts()
-  return products.find((p) => p.slug === slug) ?? null
+export async function getProductsByCategory(slug: string): Promise<Product[]> {
+  const all = await fetchProducts()
+  if (!slug || slug === 'vsetky') return all
+  return all.filter(p => p.categorySlug === slug)
 }
 
-export async function getProductsByCategory(
-  categorySlug: string
-): Promise<FeedProduct[]> {
-  const products = await fetchProducts()
-  if (categorySlug === 'vsetky') return products
-  return products.filter((p) => p.categorySlug === categorySlug)
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const all = await fetchProducts()
+  return all.find(p => p.slug === slug) ?? null
 }
 
-export async function searchProducts(query: string): Promise<FeedProduct[]> {
-  const products = await fetchProducts()
-  const q = query.toLowerCase()
-  return products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
+export async function searchProducts(q: string): Promise<Product[]> {
+  const all = await fetchProducts()
+  const query = q.toLowerCase()
+  return all.filter(p =>
+    p.name.toLowerCase().includes(query) ||
+    p.category.toLowerCase().includes(query) ||
+    p.description.toLowerCase().includes(query)
   )
 }
 
-export function formatFeedPrice(price: number): string {
-  return price.toFixed(2).replace('.', ',') + ' €'
+export function formatPrice(n: number): string {
+  return n.toFixed(2).replace('.', ',') + ' €'
 }
 
-/**
- * Convert a FeedProduct to the internal Product shape so it can be stored
- * in the Zustand cart (which was built around the mock-data Product type).
- */
-export function feedToProduct(fp: FeedProduct): import('@/types').Product {
-  const discount =
-    fp.originalPrice && fp.originalPrice > fp.price
-      ? Math.round(((fp.originalPrice - fp.price) / fp.originalPrice) * 100)
-      : undefined
-
-  return {
-    id: fp.id,
-    name: fp.name,
-    slug: fp.slug,
-    category: fp.categorySlug,
-    subcategory: fp.category,
-    price: fp.price,
-    originalPrice: fp.originalPrice,
-    discount,
-    images: fp.images.length > 0 ? fp.images : [fp.image],
-    description: fp.description,
-    shortDescription: fp.description.slice(0, 120),
-    inStock: fp.inStock,
-    stockCount: fp.inStock ? 99 : 0,
-    rating: 5,
-    reviewCount: 0,
-    tags: [],
-    viewCount: 0,
-    soldCount: 0,
-  }
-}
+// Backward-compat alias used by HeroSection
+export const formatFeedPrice = formatPrice
