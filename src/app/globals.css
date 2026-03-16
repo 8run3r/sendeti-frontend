@@ -1,21 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --coral:        #F7A072;
+    --coral-dark:   #e8875a;
+    --coral-light:  #FFF0EB;
+    --purple:       #C874D9;
+    --purple-dark:  #a855c7;
+    --purple-light: #F5E6F8;
+    --pink:         #E1BBC9;
+    --mint:         #DFF8EB;
+    --dark:         #111111;
+  }
+
   html {
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: "Nunito", sans-serif;
     scroll-behavior: smooth;
   }
+
   body {
     @apply bg-white text-neutral-900;
     -webkit-font-smoothing: antialiased;
+    font-family: "Nunito", sans-serif;
   }
+
   * {
     box-sizing: border-box;
   }
+
+  h1, h2, h3, h4 {
+    font-family: "Playfair Display", serif;
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -24,10 +44,11 @@
     @apply bg-neutral-100;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-neutral-200 rounded-full;
+    background: var(--pink);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #4A90D9;
+    background: var(--purple);
   }
 }
 
@@ -36,11 +57,21 @@
     font-family: "Playfair Display", serif;
   }
   .font-mono-price {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "Nunito", sans-serif;
+    font-weight: 900;
   }
   .dot-grid {
-    background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1.5px, transparent 1.5px);
+    background-image: radial-gradient(circle, rgba(200,116,217,0.08) 1.5px, transparent 1.5px);
     background-size: 24px 24px;
+  }
+  .gradient-brand {
+    background: linear-gradient(135deg, var(--coral), var(--purple));
+  }
+  .text-gradient-brand {
+    background: linear-gradient(135deg, var(--coral), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
@@ -63,6 +94,11 @@
   to { transform: scale(4); opacity: 0; }
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
@@ -77,7 +113,7 @@
   top: 0;
   left: 0;
   height: 3px;
-  background: #4A90D9;
+  background: linear-gradient(90deg, var(--coral), var(--purple));
   z-index: 9999;
   transition: width 0.1s linear;
 }

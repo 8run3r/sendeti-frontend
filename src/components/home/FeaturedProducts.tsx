@@ -3,6 +3,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { products } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
+import { FeedProductCard } from "@/components/product/FeedProductCard";
+import type { FeedProduct } from "@/lib/feed";
 
 const filters = [
   { id: "all", label: "Všetky" },
@@ -11,17 +13,26 @@ const filters = [
   { id: "popular", label: "Obľúbené" },
 ];
 
-export function FeaturedProducts() {
+interface Props {
+  feedProducts?: FeedProduct[];
+}
+
+export function FeaturedProducts({ feedProducts }: Props) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [showAll, setShowAll] = useState(false);
 
-  const filtered = products.filter((p) => {
-    if (activeFilter === "all") return true;
-    if (activeFilter === "new") return p.badge === "new";
-    if (activeFilter === "sale") return p.badge === "sale";
-    if (activeFilter === "popular") return p.badge === "popular" || p.badge === "bestseller";
-    return true;
-  });
+  // When feed products are provided, use them (no badge filtering)
+  const useFeed = feedProducts && feedProducts.length > 0;
+
+  const filtered = useFeed
+    ? feedProducts
+    : products.filter((p) => {
+        if (activeFilter === "all") return true;
+        if (activeFilter === "new") return p.badge === "new";
+        if (activeFilter === "sale") return p.badge === "sale";
+        if (activeFilter === "popular") return p.badge === "popular" || p.badge === "bestseller";
+        return true;
+      });
 
   const displayed = showAll ? filtered : filtered.slice(0, 8);
 
@@ -42,7 +53,7 @@ export function FeaturedProducts() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {filters.map((f) => (
+            {!useFeed && filters.map((f) => (
               <motion.button
                 key={f.id}
                 onClick={() => { setActiveFilter(f.id); setShowAll(false); }}
@@ -75,7 +86,11 @@ export function FeaturedProducts() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <ProductCard product={product} />
+                {useFeed ? (
+                  <FeedProductCard product={product as FeedProduct} />
+                ) : (
+                  <ProductCard product={product as import("@/types").Product} />
+                )}
               </motion.div>
             ))}
           </motion.div>

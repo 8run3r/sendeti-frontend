@@ -1,21 +1,20 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronDown, SlidersHorizontal, Grid, List, X } from "lucide-react";
-import { products } from "@/data/products";
 import { categories } from "@/data/categories";
-import { ProductCard } from "@/components/product/ProductCard";
+import { FeedProductCard } from "@/components/product/FeedProductCard";
+import type { FeedProduct } from "@/lib/feed";
 
-type SortOption = "popular" | "price-asc" | "price-desc" | "newest" | "rating";
+type SortOption = "popular" | "price-asc" | "price-desc" | "newest";
 
 const sortOptions: { value: SortOption; label: string }[] = [
   { value: "popular", label: "Najpopulárnejšie" },
   { value: "price-asc", label: "Cena: najnižšia" },
   { value: "price-desc", label: "Cena: najvyššia" },
   { value: "newest", label: "Najnovšie" },
-  { value: "rating", label: "Hodnotenie" },
 ];
 
 export default function CategoryPage() {
@@ -23,44 +22,64 @@ export default function CategoryPage() {
   const slug = params.slug as string;
   const category = categories.find((c) => c.id === slug);
 
+  const [allProducts, setAllProducts] = useState<FeedProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 250]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState<SortOption>("popular");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [gridView, setGridView] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/feed")
+      .then((r) => r.json())
+      .then((data: FeedProduct[]) => {
+        const categoryProducts =
+          slug === "vsetky"
+            ? data
+            : data.filter((p) => p.categorySlug === slug);
+        setAllProducts(categoryProducts);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [slug]);
+
   const filtered = useMemo(() => {
-    let result = products.filter((p) => p.category === slug);
+    let result = allProducts;
 
     if (inStockOnly) result = result.filter((p) => p.inStock);
-    result = result.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
-    if (minRating > 0) result = result.filter((p) => p.rating >= minRating);
+    result = result.filter(
+      (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
+    );
 
     switch (sort) {
-      case "price-asc": result = [...result].sort((a, b) => a.price - b.price); break;
-      case "price-desc": result = [...result].sort((a, b) => b.price - a.price); break;
-      case "rating": result = [...result].sort((a, b) => b.rating - a.rating); break;
-      case "newest": result = [...result].sort((a, b) => (b.badge === "new" ? 1 : 0) - (a.badge === "new" ? 1 : 0)); break;
-      default: result = [...result].sort((a, b) => b.viewCount - a.viewCount);
+      case "price-asc":
+        result = [...result].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        result = [...result].sort((a, b) => b.price - a.price);
+        break;
+      default:
+        break;
     }
 
     return result;
-  }, [slug, inStockOnly, priceRange, minRating, sort]);
+  }, [allProducts, inStockOnly, priceRange, sort]);
 
   const displayed = showAll ? filtered : filtered.slice(0, 12);
 
   const removeFilter = (filter: string) => {
     setActiveFilters((prev) => prev.filter((f) => f !== filter));
     if (filter === "Iba skladom") setInStockOnly(false);
-    if (filter.startsWith("Min. cena")) setPriceRange([0, priceRange[1]]);
-    if (filter.startsWith("Hodnotenie")) setMinRating(0);
+    if (filter.startsWith("Max. cena")) setPriceRange([0, 250]);
   };
 
   const addFilter = (label: string) => {
-    setActiveFilters((prev) => prev.includes(label) ? prev : [...prev, label]);
+    setActiveFilters((prev) => (prev.includes(label) ? prev : [...prev, label]));
   };
 
   return (
@@ -68,31 +87,45 @@ export default function CategoryPage() {
       {/* Category banner */}
       <div
         className="relative py-16 px-4"
-        style={{ background: category ? `linear-gradient(135deg, ${category.color} 0%, white 100%)` : "#EBF4FF" }}
+        style={{
+          background: category
+            ? `linear-gradient(135deg, ${category.color} 0%, white 100%)`
+            : "#EBF4FF",
+        }}
       >
         <div className="max-w-content mx-auto">
           <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
-            <Link href="/" className="hover:text-primary">Domov</Link>
+            <Link href="/" className="hover:text-primary">
+              Domov
+            </Link>
             <span>/</span>
-            <span className="text-neutral-900 font-medium">{category?.name ?? slug}</span>
+            <span className="text-neutral-900 font-medium">
+              {category?.name ?? slug}
+            </span>
           </nav>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-2">
             {category?.name ?? slug}
           </h1>
-          <p className="text-neutral-600">{filtered.length} produktov</p>
+          <p className="text-neutral-600">
+            {loading ? "Načítavam..." : `${filtered.length} produktov`}
+          </p>
         </div>
       </div>
 
       <div className="max-w-content mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Sidebar */}
-          <aside className={`${sidebarOpen ? "block" : "hidden"} lg:block w-64 flex-shrink-0`}>
+          <aside
+            className={`${sidebarOpen ? "block" : "hidden"} lg:block w-64 flex-shrink-0`}
+          >
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 sticky top-24 space-y-6">
               <h3 className="font-semibold text-neutral-900">Filtre</h3>
 
               {/* Price range */}
               <div>
-                <h4 className="text-sm font-semibold text-neutral-700 mb-3">Cena</h4>
+                <h4 className="text-sm font-semibold text-neutral-700 mb-3">
+                  Cena
+                </h4>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-neutral-600">
                     <span>{priceRange[0]} €</span>
@@ -103,7 +136,10 @@ export default function CategoryPage() {
                     min={0}
                     max={250}
                     value={priceRange[1]}
-                    onChange={(e) => { setPriceRange([priceRange[0], Number(e.target.value)]); addFilter(`Max. cena ${e.target.value}€`); }}
+                    onChange={(e) => {
+                      setPriceRange([priceRange[0], Number(e.target.value)]);
+                      addFilter(`Max. cena ${e.target.value}€`);
+                    }}
                     className="w-full accent-primary"
                   />
                 </div>
@@ -111,7 +147,9 @@ export default function CategoryPage() {
 
               {/* Availability */}
               <div>
-                <h4 className="text-sm font-semibold text-neutral-700 mb-3">Dostupnosť</h4>
+                <h4 className="text-sm font-semibold text-neutral-700 mb-3">
+                  Dostupnosť
+                </h4>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -127,31 +165,12 @@ export default function CategoryPage() {
                 </label>
               </div>
 
-              {/* Rating */}
-              <div>
-                <h4 className="text-sm font-semibold text-neutral-700 mb-3">Min. hodnotenie</h4>
-                <div className="space-y-1">
-                  {[4, 3, 2].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => {
-                        const newRating = minRating === r ? 0 : r;
-                        setMinRating(newRating);
-                        if (newRating) addFilter(`Hodnotenie ${r}+`);
-                        else removeFilter(`Hodnotenie ${r}+`);
-                      }}
-                      className={`flex items-center gap-2 w-full text-sm px-3 py-2 rounded-xl transition-colors ${minRating === r ? "bg-primary text-white" : "hover:bg-neutral-50 text-neutral-700"}`}
-                    >
-                      {"★".repeat(r)} a viac
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Subcategories */}
               {category && (
                 <div>
-                  <h4 className="text-sm font-semibold text-neutral-700 mb-3">Podkategórie</h4>
+                  <h4 className="text-sm font-semibold text-neutral-700 mb-3">
+                    Podkategórie
+                  </h4>
                   <div className="space-y-1">
                     {category.subcategories.map((sub) => (
                       <Link
@@ -160,7 +179,9 @@ export default function CategoryPage() {
                         className="flex justify-between items-center text-sm text-neutral-600 hover:text-primary px-3 py-2 rounded-xl hover:bg-primary-light transition-colors"
                       >
                         {sub.name}
-                        <span className="text-xs text-neutral-400">{sub.productCount}</span>
+                        <span className="text-xs text-neutral-400">
+                          {sub.productCount}
+                        </span>
                       </Link>
                     ))}
                   </div>
@@ -202,10 +223,15 @@ export default function CategoryPage() {
                   className="h-10 pl-4 pr-8 bg-white border border-neutral-200 rounded-xl text-sm outline-none cursor-pointer appearance-none"
                 >
                   {sortOptions.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400" />
+                <ChevronDown
+                  size={14}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400"
+                />
               </div>
 
               {/* Grid/List toggle */}
@@ -226,37 +252,53 @@ export default function CategoryPage() {
             </div>
 
             {/* Products */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${sort}-${inStockOnly}-${minRating}-${priceRange[1]}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className={gridView
-                  ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
-                  : "flex flex-col gap-4"
-                }
-              >
-                {displayed.length === 0 ? (
-                  <div className="col-span-full text-center py-16">
-                    <p className="text-4xl mb-4">🔍</p>
-                    <p className="font-semibold text-neutral-900 mb-2">Žiadne produkty nenájdené</p>
-                    <p className="text-sm text-neutral-500">Skúste upraviť filtre</p>
-                  </div>
-                ) : (
-                  displayed.map((product, i) => (
-                    <motion.div
-                      key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  ))
-                )}
-              </motion.div>
-            </AnimatePresence>
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-2xl bg-neutral-100 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${sort}-${inStockOnly}-${priceRange[1]}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={
+                    gridView
+                      ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
+                      : "flex flex-col gap-4"
+                  }
+                >
+                  {displayed.length === 0 ? (
+                    <div className="col-span-full text-center py-16">
+                      <p className="text-4xl mb-4">🔍</p>
+                      <p className="font-semibold text-neutral-900 mb-2">
+                        Žiadne produkty nenájdené
+                      </p>
+                      <p className="text-sm text-neutral-500">
+                        Skúste upraviť filtre
+                      </p>
+                    </div>
+                  ) : (
+                    displayed.map((product, i) => (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                      >
+                        <FeedProductCard product={product} />
+                      </motion.div>
+                    ))
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
 
             {!showAll && filtered.length > 12 && (
               <div className="text-center mt-10">

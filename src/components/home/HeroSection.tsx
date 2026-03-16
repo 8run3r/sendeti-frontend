@@ -5,8 +5,10 @@ import Link from "next/link";
 import { RippleButton } from "@/components/ui/RippleButton";
 import { ImagesBadge } from "@/components/ui/ImagesBadge";
 import { ShoppingBag, Star, Truck, Shield } from "lucide-react";
+import type { FeedProduct } from "@/lib/feed";
+import { formatFeedPrice } from "@/lib/feed";
 
-const floatingCards = [
+const fallbackCards = [
   { name: "Plyšový medveď", price: "19,90 €", image: "https://picsum.photos/seed/hero1/200/200", delay: 0 },
   { name: "Dino stavebnica", price: "34,90 €", image: "https://picsum.photos/seed/hero2/200/200", delay: 1.2 },
   { name: "Vesmírny batoh", price: "44,90 €", image: "https://picsum.photos/seed/hero3/200/200", delay: 0.6 },
@@ -19,7 +21,23 @@ const trustItems = [
   { icon: ShoppingBag, text: "Vrátenie do 14 dní" },
 ];
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroProducts?: FeedProduct[];
+}
+
+export function HeroSection({ heroProducts }: HeroSectionProps) {
+  const delays = [0, 1.2, 0.6];
+  const floatingCards =
+    heroProducts && heroProducts.length > 0
+      ? heroProducts.slice(0, 3).map((p, i) => ({
+          name: p.name.slice(0, 24),
+          price: formatFeedPrice(p.price),
+          image: p.image,
+          delay: delays[i] ?? 0,
+          url: p.url,
+        }))
+      : fallbackCards.map((c) => ({ ...c, url: "#" }));
+
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
       {/* Dot grid background */}
@@ -130,11 +148,13 @@ export function HeroSection() {
                 className="bg-white rounded-2xl shadow-lg p-3 w-44 cursor-pointer hover:shadow-xl transition-shadow"
                 whileHover={{ scale: 1.05, rotate: 2 }}
               >
-                <div className="relative w-full h-32 rounded-xl overflow-hidden mb-3 bg-neutral-100">
-                  <Image src={card.image} alt={card.name} fill className="object-cover" />
-                </div>
-                <p className="text-xs font-semibold text-neutral-900 leading-tight mb-1">{card.name}</p>
-                <p className="text-sm font-bold font-mono-price text-primary">{card.price}</p>
+                <a href={card.url} target="_blank" rel="noopener noreferrer">
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden mb-3 bg-neutral-100">
+                    <Image src={card.image} alt={card.name} fill className="object-cover" sizes="176px" />
+                  </div>
+                  <p className="text-xs font-semibold text-neutral-900 leading-tight mb-1">{card.name}</p>
+                  <p className="text-sm font-bold font-mono-price text-primary">{card.price}</p>
+                </a>
               </motion.div>
             ))}
 

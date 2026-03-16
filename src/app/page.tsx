@@ -6,15 +6,27 @@ import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { TestimonialsMarquee } from "@/components/home/TestimonialsMarquee";
 import { NewsletterSection } from "@/components/home/NewsletterSection";
+import { fetchProducts } from "@/lib/feed";
+import type { FeedProduct } from "@/lib/feed";
 
-export default function HomePage() {
+export default async function HomePage() {
+  let feedProducts: FeedProduct[] = [];
+  try {
+    feedProducts = await fetchProducts();
+  } catch {
+    // fallback to empty – components handle it gracefully
+  }
+
+  const heroProducts = feedProducts.slice(0, 3);
+  const featuredProducts = feedProducts.slice(0, 8);
+
   return (
     <>
-      <HeroSection />
+      <HeroSection heroProducts={heroProducts} />
       <CategoryGrid />
       <CollectionsCarousel />
       <SocialProofBar />
-      <FeaturedProducts />
+      <FeaturedProducts feedProducts={featuredProducts} />
       <PromoBanner />
       <TestimonialsMarquee />
       <NewsletterSection />
