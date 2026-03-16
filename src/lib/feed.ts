@@ -18,31 +18,23 @@ export interface FeedProduct {
   brand?: string
 }
 
+// Feed uses uppercase categories — match case-insensitively
 const CATEGORY_MAP: Record<string, string> = {
-  'Bytový textil': 'bytovy-textil',
-  'Obliečky': 'bytovy-textil',
-  'Plachty': 'bytovy-textil',
-  'Deky': 'bytovy-textil',
-  'Vankúšiky': 'bytovy-textil',
-  'Oblečenie': 'oblecenie',
-  'Tričká': 'oblecenie',
-  'Pyžamá': 'oblecenie',
-  'Mikiny': 'oblecenie',
-  'Hračky': 'hracky',
-  'Hračky mix': 'hracky',
-  'Školské potreby': 'skolske-potreby',
-  'Školské tašky': 'skolske-potreby',
-  'Kojenecký': 'kojenecke',
-  'Kuchyňa': 'kuchyna',
-  'Party doplnky': 'party',
-  'Doplnky': 'doplnky',
+  'bytový textil': 'bytovy-textil',
+  'oblečenie': 'oblecenie',
+  'hračky': 'hracky',
+  'školské potreby': 'skolske-potreby',
+  'kojenecké': 'kojenecke',
+  'kuchyňa': 'kuchyna',
+  'party': 'party',
+  'doplnky': 'doplnky',
 }
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .replace(/[áä]/g, 'a')
-    .replace(/[čč]/g, 'c')
+    .replace(/[čć]/g, 'c')
     .replace(/[ď]/g, 'd')
     .replace(/[éě]/g, 'e')
     .replace(/[í]/g, 'i')
@@ -59,6 +51,18 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/**
+ * Parse "29,50 EUR" → 29.50
+ * The feed uses European comma decimals.
+ */
+function parsePrice(raw: unknown): number {
+  if (!raw) return 0
+  const str = String(raw)
+    .replace(',', '.')   // "29,50" → "29.50"
+    .replace(/[^0-9.]/g, '') // strip "EUR", spaces, etc.
+  return parseFloat(str) || 0
+}
+
 export async function fetchProducts(): Promise<FeedProduct[]> {
   try {
     const res = await fetch(FEED_URL, {
@@ -68,73 +72,83 @@ export async function fetchProducts(): Promise<FeedProduct[]> {
     if (!res.ok) throw new Error(`Feed fetch failed: ${res.status}`)
 
     const xml = await res.text()
+
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
-      parseAttributeValue: false,
-      processEntities: false,
+      processEntities: false,  // avoids entity expansion limit on large feeds
+      cdataPropName: '__cdata', // parse CDATA sections explicitly
     })
 
     const parsed = parser.parse(xml)
 
     const channel = parsed?.rss?.channel
-    const items = channel?.item || []
-    const itemArray = Array.isArray(items) ? items : [items]
+    const items: unknown[] = channel?.item
+      ? Array.isArray(channel.item)
+        ? channel.item
+        : [channel.item]
+      : []
 
-    return itemArray
-      .filter((item: unknown) => item)
-      .map((item: Record<string, unknown>) => {
-        const name = String(item['title'] || item['g:title'] || '')
-        const priceRaw = item['g:price'] || item['price'] || '0'
-        const price = parseFloat(String(priceRaw).replace(/[^0-9.]/g, '')) || 0
+    return items
+      .filter(Boolean)
+      .map((item) => {
+        const i = item as Record<string, unknown>
 
-        const salePriceRaw = item['g:sale_price'] || ''
-        const salePrice = salePriceRaw
-          ? parseFloat(String(salePriceRaw).replace(/[^0-9.]/g, ''))
-          : undefined
+        // Title — may be plain string or CDATA object
+        const titleRaw = i['g:title']
+        const name = String(
+          typeof titleRaw === 'object' && titleRaw !== null
+            ? (titleRaw as Record<string, unknown>)['__cdata'] ?? ''
+            : titleRaw ?? ''
+        ).trim()
 
-        const image = String(
-          item['g:image_link'] || item['image_link'] || ''
-        )
+        // Description — may be CDATA
+        const descRaw = i['g:description']
+        const description = String(
+          typeof descRaw === 'object' && descRaw !== null
+            ? (descRaw as Record<string, unknown>)['__cdata'] ?? ''
+            : descRaw ?? ''
+        ).trim()
 
-        const additionalImages = item['g:additional_image_link']
-          ? Array.isArray(item['g:additional_image_link'])
-            ? (item['g:additional_image_link'] as unknown[]).map(String)
-            : [String(item['g:additional_image_link'])]
+        // Price: "29,50 EUR"
+        const price = parsePrice(i['g:price'])
+
+        // No sale_price in this feed — skip
+        const image = String(i['g:image_link'] ?? '')
+
+        // Additional images (not present in this feed, but keep for future)
+        const additionalImages = i['g:additional_image_link']
+          ? Array.isArray(i['g:additional_image_link'])
+            ? (i['g:additional_image_link'] as unknown[]).map(String)
+            : [String(i['g:additional_image_link'])]
           : []
 
-        const category = String(
-          item['g:product_type'] ||
-            item['g:google_product_category'] ||
-            item['product_type'] ||
-            ''
-        )
+        // Category — uppercase in this feed e.g. "BYTOVÝ TEXTIL "
+        const category = String(i['g:product_type'] ?? '').trim()
+        const categoryLower = category.toLowerCase()
 
         const categorySlug =
           Object.entries(CATEGORY_MAP).find(([key]) =>
-            category.toLowerCase().includes(key.toLowerCase())
-          )?.[1] || 'ostatne'
+            categoryLower.includes(key)
+          )?.[1] ?? 'ostatne'
 
-        const url = String(item['link'] || item['g:link'] || '')
-        const id = String(item['g:id'] || item['id'] || slugify(name))
-        const availability = String(item['g:availability'] || 'in stock')
+        const url = String(i['link'] ?? '')
+        const id = String(i['g:id'] ?? slugify(name))
+        const availability = String(i['g:availability'] ?? 'in stock')
 
         return {
           id,
           name,
           slug: slugify(name) + '-' + id,
-          price: salePrice || price,
-          originalPrice: salePrice ? price : undefined,
+          price,
           image,
           images: [image, ...additionalImages].filter(Boolean),
           url,
           category,
           categorySlug,
-          description: String(
-            item['description'] || item['g:description'] || ''
-          ),
-          inStock: !availability.includes('out'),
-          brand: String(item['g:brand'] || ''),
+          description,
+          inStock: !availability.toLowerCase().includes('out'),
+          brand: String(i['g:brand'] ?? '').trim() || undefined,
         } satisfies FeedProduct
       })
       .filter((p) => p.name && p.price > 0 && p.image)
@@ -148,7 +162,7 @@ export async function getProductBySlug(
   slug: string
 ): Promise<FeedProduct | null> {
   const products = await fetchProducts()
-  return products.find((p) => p.slug === slug) || null
+  return products.find((p) => p.slug === slug) ?? null
 }
 
 export async function getProductsByCategory(
