@@ -34,9 +34,9 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
           price: formatFeedPrice(p.price),
           image: p.image,
           delay: delays[i] ?? 0,
-          url: p.url,
+          href: `/produkt/${p.slug}`,
         }))
-      : fallbackCards.map((c) => ({ ...c, url: "#" }));
+      : fallbackCards.map((c) => ({ ...c, href: "/kategoria/vsetky" }));
 
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
@@ -148,13 +148,13 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
                 className="bg-white rounded-2xl shadow-lg p-3 w-44 cursor-pointer hover:shadow-xl transition-shadow"
                 whileHover={{ scale: 1.05, rotate: 2 }}
               >
-                <a href={card.url} target="_blank" rel="noopener noreferrer">
+                <Link href={card.href}>
                   <div className="relative w-full h-32 rounded-xl overflow-hidden mb-3 bg-neutral-100">
                     <Image src={card.image} alt={card.name} fill className="object-cover" sizes="176px" />
                   </div>
                   <p className="text-xs font-semibold text-neutral-900 leading-tight mb-1">{card.name}</p>
                   <p className="text-sm font-bold font-mono-price text-primary">{card.price}</p>
-                </a>
+                </Link>
               </motion.div>
             ))}
 

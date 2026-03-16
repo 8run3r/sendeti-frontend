@@ -219,7 +219,9 @@ export function Header() {
                 onMouseLeave={scheduleClose}
                 className="relative"
               >
-                <button
+                <Link
+                  href={`/kategoria/${cat.slug}`}
+                  onClick={() => setActiveMenu(null)}
                   className={`flex items-center gap-1 px-3 py-3 text-sm font-semibold transition-colors whitespace-nowrap ${
                     activeMenu === cat.slug
                       ? 'text-primary'
@@ -239,7 +241,7 @@ export function Header() {
                       style={{ background: 'linear-gradient(90deg, #C874D9, #F7A072)' }}
                     />
                   )}
-                </button>
+                </Link>
               </div>
             ))}
           </nav>
@@ -332,16 +334,24 @@ export function Header() {
               <div className="flex-1 py-2">
                 {CATEGORIES.map(cat => (
                   <div key={cat.slug} className="border-b border-pink/40">
-                    <button
-                      onClick={() => setMobileExpanded(mobileExpanded === cat.slug ? null : cat.slug)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-neutral-800"
-                    >
-                      <span>{cat.emoji} {cat.name}</span>
-                      <ChevronDown
-                        size={14}
-                        className={`transition-transform ${mobileExpanded === cat.slug ? 'rotate-180' : ''}`}
-                      />
-                    </button>
+                    <div className="flex items-center">
+                      <Link
+                        href={`/kategoria/${cat.slug}`}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex-1 px-4 py-3 text-sm font-semibold text-neutral-800"
+                      >
+                        {cat.emoji} {cat.name}
+                      </Link>
+                      <button
+                        onClick={() => setMobileExpanded(mobileExpanded === cat.slug ? null : cat.slug)}
+                        className="px-3 py-3 text-neutral-500"
+                      >
+                        <ChevronDown
+                          size={14}
+                          className={`transition-transform ${mobileExpanded === cat.slug ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                    </div>
                     <AnimatePresence>
                       {mobileExpanded === cat.slug && (
                         <motion.div
