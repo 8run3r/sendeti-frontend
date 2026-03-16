@@ -108,11 +108,20 @@ export function CartDrawer() {
                   <span className="font-semibold">Spolu:</span>
                   <span className="font-bold text-lg font-mono-price">{formatPrice(total)}</span>
                 </div>
-                <Link href="/pokladna" onClick={closeDrawer}>
-                  <RippleButton className="w-full h-12 bg-primary text-white font-semibold rounded-xl text-sm">
-                    Pokračovať na pokladňu →
+                <Link href="/kosik" onClick={closeDrawer}>
+                  <RippleButton className="w-full h-12 bg-primary text-white font-bold rounded-xl text-sm mb-2">
+                    Zobraziť košík →
                   </RippleButton>
                 </Link>
+                <a
+                  href="https://www.sendeti.sk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeDrawer}
+                  className="flex w-full h-10 border-2 border-pink rounded-xl text-sm font-semibold text-neutral-600 items-center justify-center hover:border-primary hover:text-primary transition-colors"
+                >
+                  Nakúpiť na sendeti.sk ↗
+                </a>
               </div>
             )}
           </motion.div>

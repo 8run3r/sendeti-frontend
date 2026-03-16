@@ -187,3 +187,35 @@ export async function searchProducts(query: string): Promise<FeedProduct[]> {
 export function formatFeedPrice(price: number): string {
   return price.toFixed(2).replace('.', ',') + ' €'
 }
+
+/**
+ * Convert a FeedProduct to the internal Product shape so it can be stored
+ * in the Zustand cart (which was built around the mock-data Product type).
+ */
+export function feedToProduct(fp: FeedProduct): import('@/types').Product {
+  const discount =
+    fp.originalPrice && fp.originalPrice > fp.price
+      ? Math.round(((fp.originalPrice - fp.price) / fp.originalPrice) * 100)
+      : undefined
+
+  return {
+    id: fp.id,
+    name: fp.name,
+    slug: fp.slug,
+    category: fp.categorySlug,
+    subcategory: fp.category,
+    price: fp.price,
+    originalPrice: fp.originalPrice,
+    discount,
+    images: fp.images.length > 0 ? fp.images : [fp.image],
+    description: fp.description,
+    shortDescription: fp.description.slice(0, 120),
+    inStock: fp.inStock,
+    stockCount: fp.inStock ? 99 : 0,
+    rating: 5,
+    reviewCount: 0,
+    tags: [],
+    viewCount: 0,
+    soldCount: 0,
+  }
+}

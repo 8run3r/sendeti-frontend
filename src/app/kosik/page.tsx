@@ -142,14 +142,22 @@ export default function CartPage() {
                 />
               </div>
 
-              <Link href="/pokladna">
-                <RippleButton className="w-full h-12 bg-primary text-white font-semibold rounded-xl mb-3">
-                  Pokračovať na pokladňu →
+              <a
+                href="https://www.sendeti.sk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full"
+              >
+                <RippleButton className="w-full h-12 bg-primary text-white font-bold rounded-xl mb-3">
+                  Dokončiť nákup na sendeti.sk ↗
                 </RippleButton>
-              </Link>
+              </a>
               <Link href="/" className="block text-center text-sm text-primary hover:underline">
                 ← Pokračovať v nakupovaní
               </Link>
+              <p className="text-xs text-neutral-400 text-center mt-3 leading-relaxed">
+                Objednávky sa spracúvajú priamo cez sendeti.sk
+              </p>
 
               <div className="mt-5 pt-5 border-t border-neutral-100">
                 <p className="text-xs text-neutral-400 text-center mb-2">Bezpečná platba</p>
