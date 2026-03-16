@@ -76,9 +76,9 @@ export function FeedProductCard({ product }: Props) {
             />
           )}
 
-          {/* Discount badge */}
+          {/* Discount badge — orange for eye-catching contrast */}
           {discount && (
-            <div className="absolute top-3 left-3 z-10 bg-primary text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            <div className="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-2.5 py-1 rounded-full">
               -{discount}%
             </div>
           )}
@@ -132,9 +132,9 @@ export function FeedProductCard({ product }: Props) {
           </h3>
         </Link>
 
-        {/* Price */}
+        {/* Price — orange/accent for strong contrast against pink buttons */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="font-mono-price text-base text-primary">
+          <span className="font-mono-price text-base text-accent-dark">
             {formatFeedPrice(product.price)}
           </span>
           {product.originalPrice && (

@@ -6,15 +6,19 @@
 
 @layer base {
   :root {
-    --coral:        #F7A072;
-    --coral-dark:   #e8875a;
-    --coral-light:  #FFF0EB;
+    /* PRIMARY — pink/rose-purple */
+    --primary:      #C874D9;
+    --primary-dark: #a855c7;
+    --primary-light:#F5E6F8;
+    /* ACCENT — orange/coral (contrast to pink) */
+    --orange:       #F7A072;
+    --orange-dark:  #e8875a;
+    --orange-light: #FFF0EB;
+    /* SUPPORTING */
     --pink:         #E1BBC9;
     --pink-light:   #FBF0F4;
     --mint:         #E2FCEF;
     --mint-dark:    #52C97E;
-    --purple:       #C874D9;
-    --purple-light: #F5E6F8;
     --dark:         #1a1a1a;
   }
 
@@ -38,8 +42,8 @@
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--pink-light); }
-  ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--coral); }
+  ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 }
 
 @layer utilities {
@@ -53,26 +57,38 @@
     letter-spacing: -0.02em;
   }
   .dot-grid {
-    background-image: radial-gradient(circle, rgba(247,160,114,0.10) 1.5px, transparent 1.5px);
+    background-image: radial-gradient(circle, rgba(200,116,217,0.10) 1.5px, transparent 1.5px);
     background-size: 24px 24px;
   }
+  /* Pink → Orange: the core brand gradient */
   .gradient-brand {
-    background: linear-gradient(135deg, var(--coral), var(--purple));
+    background: linear-gradient(135deg, var(--primary), var(--orange));
   }
   .text-gradient-brand {
-    background: linear-gradient(135deg, var(--coral), var(--purple));
+    background: linear-gradient(135deg, var(--primary), var(--orange));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .btn-coral {
-    background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  .btn-primary {
+    background: var(--primary);
     color: white;
     border: none;
     transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .btn-coral:hover {
-    background: linear-gradient(135deg, var(--coral-dark), var(--purple));
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(200,116,217,0.35);
+  }
+  .btn-accent {
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color: white;
+    border: none;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-accent:hover {
+    background: linear-gradient(135deg, var(--orange-dark), var(--primary));
     transform: translateY(-2px);
     box-shadow: 0 12px 32px rgba(247,160,114,0.35);
   }
@@ -106,7 +122,8 @@
   position: fixed;
   top: 0; left: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--coral), var(--purple));
+  /* pink → orange: the brand contrast gradient */
+  background: linear-gradient(90deg, var(--primary), var(--orange));
   z-index: 9999;
   transition: width 0.1s linear;
 }

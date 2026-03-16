@@ -148,9 +148,9 @@ export function FeedProductDetail({ product }: Props) {
               </p>
             )}
 
-            {/* Price */}
+            {/* Price — orange for contrast against pink UI */}
             <div className="flex items-center gap-3 mb-4">
-              <span className="font-mono-price text-3xl text-primary">
+              <span className="font-mono-price text-3xl text-accent-dark">
                 {formatFeedPrice(product.price)}
               </span>
               {product.originalPrice && (
@@ -159,7 +159,7 @@ export function FeedProductDetail({ product }: Props) {
                     {formatFeedPrice(product.originalPrice)}
                   </span>
                   {discount && (
-                    <span className="text-sm font-bold text-white bg-primary px-2.5 py-0.5 rounded-full">
+                    <span className="text-sm font-bold text-white bg-accent px-2.5 py-0.5 rounded-full">
                       -{discount}%
                     </span>
                   )}
@@ -271,7 +271,7 @@ export function FeedProductDetail({ product }: Props) {
             <div className="max-w-content mx-auto flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-neutral-900 line-clamp-1">{product.name}</p>
-                <span className="font-mono-price text-primary">{formatFeedPrice(product.price)}</span>
+                <span className="font-mono-price text-accent-dark">{formatFeedPrice(product.price)}</span>
               </div>
               <RippleButton
                 onClick={handleAddToCart}

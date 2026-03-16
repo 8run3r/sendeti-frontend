@@ -5,20 +5,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // F7A072 coral — primary action colour (most used)
-        primary: "#F7A072",
-        "primary-light": "#FFF0EB",
-        "primary-dark": "#e8875a",
-        // E1BBC9 pink — borders, soft backgrounds (second most used)
+        // #C874D9 — pink/rose-purple = PRIMARY (most used: buttons, links, active states)
+        primary: "#C874D9",
+        "primary-light": "#F5E6F8",
+        "primary-dark": "#a855c7",
+        // #F7A072 — orange/coral = ACCENT contrast (CTAs, prices, badges)
+        accent: "#F7A072",
+        "accent-dark": "#e8875a",
+        // #E1BBC9 — dusty rose = soft backgrounds, borders
         pink: "#E1BBC9",
         "pink-light": "#FBF0F4",
-        // E2FCEF mint — success, free-shipping, badges (third)
+        // #E2FCEF — mint = success states, free shipping
         mint: "#E2FCEF",
         "mint-dark": "#52C97E",
-        // Purple — sale / promo highlights
-        accent: "#C874D9",
-        "accent-light": "#F5E6F8",
-        // legacy alias used throughout components
+        // legacy aliases
         "accent-warm": "#F7A072",
         "accent-green": "#52C97E",
         // Neutrals
