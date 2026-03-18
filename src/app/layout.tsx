@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 const CartDrawer = dynamic(
   () => import('@/components/cart/CartDrawer'),
@@ -26,8 +27,24 @@ const bodyFont = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Sen Detí — Prémiový detský e-shop',
-  description: 'Oblečenie, obliečky a hračky pre deti. Overený slovenský e-shop.',
+  title: {
+    default: 'Sen Detí — Prémiový detský e-shop',
+    template: '%s | Sen Detí',
+  },
+  description: 'Detské oblečenie, obliečky, hračky a školské potreby. Overený slovenský e-shop s doručením do 3 dní.',
+  keywords: ['detský e-shop', 'detské oblečenie', 'obliečky pre deti', 'hračky', 'slovenský e-shop'],
+  openGraph: {
+    title: 'Sen Detí — Prémiový detský e-shop',
+    description: 'Detské oblečenie, obliečky, hračky a školské potreby.',
+    url: 'https://www.sendeti.sk',
+    siteName: 'Sen Detí',
+    locale: 'sk_SK',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -36,7 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased bg-cream text-dark">
         <Navbar />
         <CartDrawer />
-        <main className="min-h-screen animate-fadeIn">{children}</main>
+        <ErrorBoundary>
+          <main className="min-h-screen animate-fadeIn">{children}</main>
+        </ErrorBoundary>
         <Footer />
       </body>
     </html>

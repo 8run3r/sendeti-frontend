@@ -20,7 +20,6 @@ export interface Product {
   badge?: 'sale' | 'new' | 'popular'
 }
 
-// Backward-compat alias used by HeroSection
 export type FeedProduct = Product
 
 const CATEGORY_MAP: Record<string, { slug: string; name: string }> = {
@@ -84,21 +83,40 @@ function parsePrice(raw: unknown): number {
   ) || 0
 }
 
+function isValidProduct(p: Product): boolean {
+  return (
+    typeof p.name === 'string' &&
+    p.name.length > 2 &&
+    typeof p.price === 'number' &&
+    p.price > 0 &&
+    p.price < 50000 &&
+    typeof p.image === 'string' &&
+    p.image.startsWith('http')
+  )
+}
+
 // In-memory cache — avoids Next.js 2MB unstable_cache limit
 let _cache: { data: Product[]; ts: number } | null = null
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
 async function fetchProductsRaw(): Promise<Product[]> {
   if (_cache && Date.now() - _cache.ts < CACHE_TTL) return _cache.data
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 10000)
+
   try {
     const res = await fetch(FEED_URL, {
+      signal: controller.signal,
       next: { revalidate: 3600 },
       headers: {
         'User-Agent': 'Mozilla/5.0',
         'Cache-Control': 'no-transform',
       },
     })
-    if (!res.ok) throw new Error(`Feed ${res.status}`)
+    clearTimeout(timeout)
+
+    if (!res.ok) throw new Error(`Feed HTTP ${res.status}`)
 
     const xml = await res.text()
     const parser = new XMLParser({
@@ -156,12 +174,16 @@ async function fetchProductsRaw(): Promise<Product[]> {
           badge: (salePrice ? 'sale' : index < 10 ? 'new' : undefined) as Product['badge'],
         } satisfies Product
       })
-      .filter(p => p.name && p.price > 0 && p.image)
-      .slice(0, 200)
+      .filter(isValidProduct)
+      .slice(0, 300)
+
     _cache = { data: products, ts: Date.now() }
     return products
   } catch (err) {
-    console.error('Feed error:', err)
+    clearTimeout(timeout)
+    if (err instanceof Error) {
+      console.error('[Feed] Error:', err.message)
+    }
     return _cache?.data ?? []
   }
 }
@@ -193,5 +215,4 @@ export function formatPrice(n: number): string {
   return n.toFixed(2).replace('.', ',') + ' €'
 }
 
-// Backward-compat alias used by HeroSection
 export const formatFeedPrice = formatPrice

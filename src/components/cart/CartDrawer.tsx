@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { X, ShoppingBag, Plus, Minus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
@@ -9,12 +10,24 @@ const FREE_SHIPPING = 35
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, totalItems, totalPrice } = useCartStore()
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => setHydrated(true), [])
 
   const total = totalPrice()
   const remaining = Math.max(0, FREE_SHIPPING - total)
   const progress = Math.min((total / FREE_SHIPPING) * 100, 100)
 
-  if (!isOpen) return null
+  if (!isOpen || !hydrated) return null
+
+  function handleCheckout() {
+    if (items.length === 0) return
+    if (items.length === 1) {
+      window.open(items[0].product.shopUrl, '_self')
+    } else {
+      window.open('https://shop.sendeti.sk', '_self')
+    }
+  }
 
   return (
     <>
@@ -123,11 +136,14 @@ export default function CartDrawer() {
                 {total.toFixed(2).replace('.', ',')} €
               </span>
             </div>
+            {items.length > 1 && (
+              <p className="text-xs rounded-xl p-3 text-center font-sans"
+                 style={{ background: '#FFF8E1', color: '#92400E' }}>
+                ℹ️ Budete presmerovaní na sendeti.sk kde dokončíte objednávku.
+              </p>
+            )}
             <button
-              onClick={() => {
-                const url = items.length === 1 ? items[0].product.shopUrl : 'https://shop.sendeti.sk'
-                window.location.href = url
-              }}
+              onClick={handleCheckout}
               className="w-full py-4 font-bold text-white rounded-xl text-sm transition-all hover:opacity-90 font-sans"
               style={{ background: 'linear-gradient(135deg,#C874D9,#F7A072)', boxShadow: '0 8px 24px rgba(247,160,114,0.35)' }}>
               Prejsť k objednávke →

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getProductsByCategory, formatPrice } from '@/lib/feed'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -287,6 +288,19 @@ export default async function CategoryPage({
       </div>
     </div>
   )
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const name = CAT_NAMES[params.slug] || params.slug
+  const cleanName = name.replace(/[^\w\s]/g, '').trim()
+  return {
+    title: cleanName,
+    description: `Nakupujte ${cleanName} v overenom slovenskom e-shope Sen Detí. Rýchle doručenie, vrátenie 14 dní.`,
+  }
 }
 
 export async function generateStaticParams() {

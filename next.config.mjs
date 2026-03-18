@@ -9,8 +9,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'picsum.photos' },
     ],
     minimumCacheTTL: 3600,
-    formats: ['image/webp'],
+    formats: ['image/webp', 'image/avif'],
   },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
   productionBrowserSourceMaps: false,
 }
 export default nextConfig
