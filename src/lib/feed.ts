@@ -84,7 +84,10 @@ function parsePrice(raw: unknown): number {
 
 async function fetchProductsRaw(): Promise<Product[]> {
   try {
-    const res = await fetch(FEED_URL, { cache: 'no-store' })
+    const res = await fetch(FEED_URL, {
+      next: { revalidate: 300 },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SenDeti/1.0)' },
+    })
     if (!res.ok) throw new Error(`Feed ${res.status}`)
 
     const xml = await res.text()
