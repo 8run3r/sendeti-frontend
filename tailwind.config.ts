@@ -25,10 +25,10 @@ const config: Config = {
         "neutral-900": "#1a1a1a",
       },
       fontFamily: {
-        display: ["Playfair Display", "Georgia", "serif"],
-        body: ["Nunito", "sans-serif"],
-        sans: ["Nunito", "sans-serif"],
-        mono: ["Nunito", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        body: ["var(--font-body)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
+        mono: ["var(--font-body)", "sans-serif"],
       },
       boxShadow: {
         sm: "0 2px 8px rgba(0,0,0,0.06)",

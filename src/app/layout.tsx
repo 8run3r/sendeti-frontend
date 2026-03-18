@@ -1,10 +1,25 @@
 import type { Metadata, Viewport } from 'next'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/layout/Header'
+import Navbar from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { CartDrawer } from '@/components/layout/CartDrawer'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ScrollProgressBar } from '@/components/marketing/ScrollProgressBar'
+
+const displayFont = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const bodyFont = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'SEN DETÍ — Prémiový detský e-shop',
@@ -17,10 +32,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sk">
+    <html lang="sk" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body>
         <ScrollProgressBar />
-        <Header />
+        <Navbar />
         <main>{children}</main>
         <Footer />
         <CartDrawer />
