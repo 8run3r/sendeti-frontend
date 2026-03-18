@@ -37,11 +37,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm uppercase tracking-widest text-neutral-400 mb-4">Pomoc a info</h4>
             <ul className="space-y-2 text-sm text-neutral-300">
-              <li><a href="https://shop.sendeti.sk/DODACIE-PODMIENKY-a4_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dodacie podmienky</a></li>
-              <li><a href="https://shop.sendeti.sk/OBCHODNE-PODMIENKY-a3_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Obchodné podmienky</a></li>
-              <li><a href="https://shop.sendeti.sk/GDPR-a6_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GDPR</a></li>
-              <li><a href="https://shop.sendeti.sk/KONTAKTY-a2_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kontakty</a></li>
-              <li><a href="https://shop.sendeti.sk/blog" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="https://shop.sendeti.sk/DODACIE-PODMIENKY-a4_0.htm"  className="hover:text-white transition-colors">Dodacie podmienky</a></li>
+              <li><a href="https://shop.sendeti.sk/OBCHODNE-PODMIENKY-a3_0.htm"  className="hover:text-white transition-colors">Obchodné podmienky</a></li>
+              <li><a href="https://shop.sendeti.sk/GDPR-a6_0.htm"  className="hover:text-white transition-colors">GDPR</a></li>
+              <li><a href="https://shop.sendeti.sk/KONTAKTY-a2_0.htm"  className="hover:text-white transition-colors">Kontakty</a></li>
+              <li><a href="https://shop.sendeti.sk/blog"  className="hover:text-white transition-colors">Blog</a></li>
             </ul>
           </div>
 

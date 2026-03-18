@@ -166,8 +166,8 @@ export function CartDrawer() {
 
                 <a
                   href={checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  
+                 
                   className="block w-full h-12 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg,#C874D9,#F7A072)' }}
                 >

@@ -196,8 +196,8 @@ export function FeedProductDetail({ product }: { product: Product }) {
             {/* Direct buy — secondary small link */}
             <a
               href={product.shopUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              
+             
               className="flex items-center justify-center gap-1 text-sm text-neutral-400 hover:text-neutral-600 transition-colors mb-6"
             >
               <ExternalLink size={12} />

@@ -142,8 +142,8 @@ export default function CartPage() {
 
               <a
                 href="https://shop.sendeti.sk"
-                target="_blank"
-                rel="noopener noreferrer"
+                
+               
                 className="block w-full"
               >
                 <RippleButton className="w-full h-12 bg-primary text-white font-bold rounded-xl mb-3">
