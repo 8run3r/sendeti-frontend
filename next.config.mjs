@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.sendeti.sk",
       },
+      {
+        protocol: "https",
+        hostname: "www.apoleus.sk",
+      },
     ],
   },
 };

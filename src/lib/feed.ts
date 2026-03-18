@@ -1,5 +1,4 @@
 import { XMLParser } from 'fast-xml-parser'
-import { unstable_cache } from 'next/cache'
 
 const FEED_URL = process.env.FEED_URL ||
   'https://www.sendeti.sk/fotky46145/xml/google_nakupy.xml'
@@ -85,11 +84,16 @@ function parsePrice(raw: unknown): number {
   ) || 0
 }
 
+// In-memory cache — avoids Next.js 2MB unstable_cache limit
+let _cache: { data: Product[]; ts: number } | null = null
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
 async function fetchProductsRaw(): Promise<Product[]> {
+  if (_cache && Date.now() - _cache.ts < CACHE_TTL) return _cache.data
   try {
     const res = await fetch(FEED_URL, {
-      next: { revalidate: 300 },
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SenDeti/1.0)' },
+      cache: 'no-store',
     })
     if (!res.ok) throw new Error(`Feed ${res.status}`)
 
@@ -105,7 +109,7 @@ async function fetchProductsRaw(): Promise<Product[]> {
     const rawItems = data?.rss?.channel?.item ?? []
     const items: unknown[] = Array.isArray(rawItems) ? rawItems : [rawItems]
 
-    return items
+    const products = items
       .filter(Boolean)
       .map((item, index) => {
         const i = item as Record<string, unknown>
@@ -150,18 +154,15 @@ async function fetchProductsRaw(): Promise<Product[]> {
         } satisfies Product
       })
       .filter(p => p.name && p.price > 0 && p.image)
+    _cache = { data: products, ts: Date.now() }
+    return products
   } catch (err) {
     console.error('Feed error:', err)
-    return []
+    return _cache?.data ?? []
   }
 }
 
-// Cache the parsed JS array (small) instead of the raw 21MB XML response
-export const fetchProducts = unstable_cache(
-  fetchProductsRaw,
-  ['sendeti-feed-products'],
-  { revalidate: 300 }
-)
+export const fetchProducts = fetchProductsRaw
 
 export async function getProductsByCategory(slug: string): Promise<Product[]> {
   const all = await fetchProducts()

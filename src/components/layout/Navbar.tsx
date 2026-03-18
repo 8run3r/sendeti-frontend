@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShoppingCart, Heart, Search, Menu, X, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
@@ -19,9 +19,12 @@ const CATS = [
 export default function Navbar() {
   const [openCat, setOpenCat] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const totalItems = useCartStore(s => s.totalItems())
   const openCart = useCartStore(s => s.openCart)
+
+  useEffect(() => { setMounted(true) }, [])
 
   function go(slug: string) {
     setOpenCat(null)
@@ -88,7 +91,7 @@ export default function Navbar() {
             <button onClick={openCart}
                     className="relative p-2.5 rounded-xl hover:bg-blush transition-colors">
               <ShoppingCart size={20} className="text-muted" />
-              {totalItems > 0 && (
+              {mounted && totalItems > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 bg-coral
                                  text-white text-[10px] font-bold rounded-full
                                  flex items-center justify-center">
