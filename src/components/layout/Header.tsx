@@ -116,7 +116,7 @@ export function Header() {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const totalItems = useCartStore(s => s.totalItems())
-  const openDrawer = useCartStore(s => s.openDrawer)
+  const openDrawer = useCartStore(s => s.openCart)
   const wishlistCount = useWishlistStore(s => s.items?.length ?? 0)
 
   useEffect(() => {

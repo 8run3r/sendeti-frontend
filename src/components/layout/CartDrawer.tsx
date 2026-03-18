@@ -10,7 +10,7 @@ import { formatPrice } from '@/lib/feed'
 const FREE_SHIPPING = 35
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, closeDrawer, removeItem, updateQty, totalPrice, totalItems } =
+  const { items, isOpen: isDrawerOpen, closeCart: closeDrawer, removeItem, updateQty, totalPrice, totalItems } =
     useCartStore()
   const total = totalPrice()
   const toFree = Math.max(0, FREE_SHIPPING - total)

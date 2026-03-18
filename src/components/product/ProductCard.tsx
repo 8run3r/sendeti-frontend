@@ -23,7 +23,7 @@ export function ProductCard({ product }: Props) {
   const [hovered, setHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
-  const openDrawer = useCartStore((s) => s.openDrawer);
+  const openCart = useCartStore((s) => s.openCart);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const isWishlisted = useWishlistStore((s) => s.hasItem(product.id));
 
@@ -48,9 +48,9 @@ export function ProductCard({ product }: Props) {
       inStock: product.inStock,
       badge: (product.badge === 'bestseller' ? 'popular' : product.badge) as FeedProduct['badge'],
     }
-    addItem(feedProduct, 1);
+    addItem(feedProduct);
     showToast(`${product.name.slice(0, 30)}... pridaný do košíka`);
-    openDrawer();
+    openCart();
   };
 
   const handleWishlist = (e: React.MouseEvent) => {

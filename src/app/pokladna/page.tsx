@@ -15,7 +15,7 @@ const steps = [
 export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [completed, setCompleted] = useState(false);
-  const { items, totalPrice, clear } = useCartStore();
+  const { items, totalPrice, clearCart: clear } = useCartStore();
   const total = totalPrice();
 
   const [formData, setFormData] = useState({
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex gap-3 text-sm">
                     <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-100">
-                      <img src={item.product.images?.[0] ?? item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+                      <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium line-clamp-1">{item.product.name}</p>

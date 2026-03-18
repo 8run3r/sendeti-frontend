@@ -23,7 +23,7 @@ export default function AddToCartBtn({ product }: { product: CartProduct }) {
   function handleClick(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    addItem(product, 1)
+    addItem(product)
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }

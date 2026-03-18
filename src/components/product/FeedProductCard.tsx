@@ -19,11 +19,14 @@ export function FeedProductCard({ product }: Props) {
   const btnRef = useRef<HTMLButtonElement>(null)
 
   const addItem = useCartStore(s => s.addItem)
-  const openDrawer = useCartStore(s => s.openDrawer)
+  const openCart = useCartStore(s => s.openCart)
   const toggle = useWishlistStore(s => s.toggle)
   const isWished = useWishlistStore(s => s.hasItem(product.id))
 
   const hasSecond = product.images.length > 1
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : undefined
 
   const handleCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -34,9 +37,17 @@ export function FeedProductCard({ product }: Props) {
       setRipple({ x: e.clientX - rect.left, y: e.clientY - rect.top })
       setTimeout(() => setRipple(null), 600)
     }
-    addItem(product)
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      slug: product.slug,
+      shopUrl: product.shopUrl,
+      inStock: product.inStock,
+    })
     showToast(`✓ ${product.name.slice(0, 30)} pridaný do košíka`)
-    openDrawer()
+    openCart()
   }
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -45,26 +56,17 @@ export function FeedProductCard({ product }: Props) {
     showToast(isWished ? 'Odstránené z obľúbených' : '♡ Pridané do obľúbených')
   }
 
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : undefined
-
   return (
     <motion.article
       className="group relative bg-white rounded-3xl overflow-hidden cursor-pointer"
       style={{ border: '1px solid rgba(225,187,201,0.5)' }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      whileHover={{
-        y: -6,
-        boxShadow: '0 20px 40px rgba(200,116,217,0.18)',
-        borderColor: '#C874D9',
-      }}
+      whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(200,116,217,0.18)', borderColor: '#C874D9' }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
-      {/* Image */}
       <Link href={`/produkt/${product.slug}`}>
-        <div className="relative aspect-square overflow-hidden bg-pink-light">
+        <div className="relative aspect-square overflow-hidden bg-pink-50">
           <motion.div
             className="absolute inset-0"
             animate={{ scale: hovered ? 1.07 : 1 }}
@@ -88,82 +90,45 @@ export function FeedProductCard({ product }: Props) {
             )}
           </motion.div>
 
-          {/* Badge */}
           {product.badge && (
             <div
               className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[11px] font-black text-white uppercase tracking-wide"
-              style={{
-                background: product.badge === 'sale'
-                  ? 'linear-gradient(135deg,#F7A072,#e8875a)'
-                  : 'linear-gradient(135deg,#C874D9,#a855c7)',
-              }}
+              style={{ background: product.badge === 'sale' ? 'linear-gradient(135deg,#F7A072,#e8875a)' : 'linear-gradient(135deg,#C874D9,#a855c7)' }}
             >
               {product.badge === 'sale' ? 'AKCIA' : product.badge === 'new' ? 'NOVÉ' : 'TOP'}
             </div>
           )}
 
-          {/* Wishlist */}
           <motion.button
             onClick={handleWishlist}
             whileTap={{ scale: 1.4 }}
             className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
           >
-            <Heart
-              size={15}
-              className={isWished ? 'fill-primary text-primary' : 'text-neutral-400'}
-            />
+            <Heart size={15} className={isWished ? 'fill-primary text-primary' : 'text-neutral-400'} />
           </motion.button>
-
-          {/* Quick view pill */}
-          <AnimatePresence>
-            {hovered && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10"
-              >
-                <span
-                  className="px-4 py-1.5 rounded-full text-xs font-bold text-white whitespace-nowrap"
-                  style={{ background: 'rgba(26,26,26,0.75)', backdropFilter: 'blur(8px)' }}
-                >
-                  Rýchly náhľad →
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {!product.inStock && (
             <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-              <span className="text-sm font-bold text-neutral-400 tracking-wide uppercase text-xs">Nedostupné</span>
+              <span className="text-xs font-bold text-neutral-400 tracking-wide uppercase">Nedostupné</span>
             </div>
           )}
         </div>
       </Link>
 
-      {/* Info */}
       <div className="p-4">
-        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">
-          {product.category}
-        </p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">{product.category}</p>
         <Link href={`/produkt/${product.slug}`}>
-          <h3 className="font-body text-sm font-bold text-neutral-900 line-clamp-2 mb-2 hover:text-primary transition-colors leading-snug">
+          <h3 className="text-sm font-bold text-neutral-900 line-clamp-2 mb-2 hover:text-primary transition-colors leading-snug">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
-          <span className="font-mono-price text-base" style={{ color: '#F7A072' }}>
-            {formatPrice(product.price)}
-          </span>
+          <span className="text-base font-bold" style={{ color: '#F7A072' }}>{formatPrice(product.price)}</span>
           {product.originalPrice && (
             <>
-              <span className="text-xs text-neutral-300 line-through font-mono-price">
-                {formatPrice(product.originalPrice)}
-              </span>
+              <span className="text-xs text-neutral-300 line-through">{formatPrice(product.originalPrice)}</span>
               {discount && (
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: '#F7A072' }}>
                   -{discount}%
@@ -173,13 +138,12 @@ export function FeedProductCard({ product }: Props) {
           )}
         </div>
 
-        {/* Cart button with ripple */}
         <motion.button
           ref={btnRef}
           onClick={handleCart}
           disabled={!product.inStock}
           whileTap={{ scale: 0.97 }}
-          className="relative w-full h-9 rounded-xl text-xs font-bold overflow-hidden transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="relative w-full h-9 rounded-xl text-xs font-bold overflow-hidden transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             border: '2px solid #F7A072',
             color: hovered ? 'white' : '#F7A072',
