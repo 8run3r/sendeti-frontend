@@ -19,7 +19,7 @@ export function CartDrawer() {
   const checkoutUrl =
     items.length === 1
       ? items[0].product.shopUrl
-      : 'https://www.sendeti.sk'
+      : 'https://shop.sendeti.sk'
 
   return (
     <AnimatePresence>
@@ -171,11 +171,11 @@ export function CartDrawer() {
                   className="block w-full h-12 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg,#C874D9,#F7A072)' }}
                 >
-                  🛒 Prejsť na sendeti.sk
+                  Prejsť k objednávke →
                 </a>
 
                 <p className="text-[10px] text-neutral-400 text-center mt-2 leading-relaxed">
-                  Budete presmerovaní na zabezpečenú platobnú stránku sendeti.sk
+                  🔒 Budete presmerovaní na zabezpečenú stránku sendeti.sk
                 </p>
 
                 <Link

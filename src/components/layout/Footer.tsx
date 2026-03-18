@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram, Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Facebook, Instagram, Mail, Phone, Clock } from "lucide-react";
 
 export function Footer() {
   return (
@@ -25,9 +25,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm uppercase tracking-widest text-neutral-400 mb-4">Nakupovanie</h4>
             <ul className="space-y-2 text-sm text-neutral-300">
-              {["Všetky kategórie", "Novinky", "Výpredaj", "Bestsellery", "Darčekové poukazy"].map((item) => (
-                <li key={item}><Link href="#" className="hover:text-white transition-colors">{item}</Link></li>
-              ))}
+              <li><Link href="/kategoria/vsetky" className="hover:text-white transition-colors">Všetky produkty</Link></li>
+              <li><Link href="/kategoria/bytovy-textil" className="hover:text-white transition-colors">Bytový textil</Link></li>
+              <li><Link href="/kategoria/oblecenie" className="hover:text-white transition-colors">Oblečenie</Link></li>
+              <li><Link href="/kategoria/hracky" className="hover:text-white transition-colors">Hračky</Link></li>
+              <li><Link href="/kategoria/skolske-potreby" className="hover:text-white transition-colors">Školské potreby</Link></li>
             </ul>
           </div>
 
@@ -35,9 +37,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm uppercase tracking-widest text-neutral-400 mb-4">Pomoc a info</h4>
             <ul className="space-y-2 text-sm text-neutral-300">
-              {["Dodacie podmienky", "Vrátenie tovaru", "GDPR", "Obchodné podmienky", "Kontakty"].map((item) => (
-                <li key={item}><Link href="#" className="hover:text-white transition-colors">{item}</Link></li>
-              ))}
+              <li><a href="https://shop.sendeti.sk/DODACIE-PODMIENKY-a4_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dodacie podmienky</a></li>
+              <li><a href="https://shop.sendeti.sk/OBCHODNE-PODMIENKY-a3_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Obchodné podmienky</a></li>
+              <li><a href="https://shop.sendeti.sk/GDPR-a6_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GDPR</a></li>
+              <li><a href="https://shop.sendeti.sk/KONTAKTY-a2_0.htm" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kontakty</a></li>
+              <li><a href="https://shop.sendeti.sk/blog" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Blog</a></li>
             </ul>
           </div>
 
@@ -45,9 +49,8 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm uppercase tracking-widest text-neutral-400 mb-4">Kontakt</h4>
             <ul className="space-y-3 text-sm text-neutral-300">
-              <li className="flex items-center gap-2"><MapPin size={14} className="text-primary flex-shrink-0" /> Hlavná 12, Bratislava</li>
-              <li className="flex items-center gap-2"><Phone size={14} className="text-primary flex-shrink-0" /> 0905 123 456</li>
-              <li className="flex items-center gap-2"><Mail size={14} className="text-primary flex-shrink-0" /> info@sendeti.sk</li>
+              <li className="flex items-center gap-2"><Phone size={14} className="text-primary flex-shrink-0" /><a href="tel:+421905449916" className="hover:text-white transition-colors">+421 905 449 916</a></li>
+              <li className="flex items-center gap-2"><Mail size={14} className="text-primary flex-shrink-0" /><a href="mailto:sendeti@centrum.sk" className="hover:text-white transition-colors">sendeti@centrum.sk</a></li>
               <li className="flex items-center gap-2"><Clock size={14} className="text-primary flex-shrink-0" /> Po–Pia: 9:00–17:00</li>
             </ul>
           </div>
@@ -56,7 +59,7 @@ export function Footer() {
 
       <div className="border-t border-white/10">
         <div className="max-w-content mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-neutral-500">© 2025 Sen Detí. Všetky práva vyhradené.</p>
+          <p className="text-xs text-neutral-500">© 2026 Sen Detí. Všetky práva vyhradené.</p>
           <div className="flex items-center gap-3 text-neutral-400 text-xs">
             <span className="border border-neutral-600 px-2 py-0.5 rounded">VISA</span>
             <span className="border border-neutral-600 px-2 py-0.5 rounded">MC</span>

@@ -193,16 +193,15 @@ export function FeedProductDetail({ product }: { product: Product }) {
               </motion.button>
             </div>
 
-            {/* Direct buy */}
+            {/* Direct buy — secondary small link */}
             <a
               href={product.shopUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full h-11 rounded-xl items-center justify-center gap-2 text-sm font-bold transition-all hover:opacity-80 mb-6"
-              style={{ background: 'linear-gradient(135deg,#F7A072,#e8875a)', color: 'white' }}
+              className="flex items-center justify-center gap-1 text-sm text-neutral-400 hover:text-neutral-600 transition-colors mb-6"
             >
-              <ExternalLink size={14} />
-              🛒 Kúpiť na sendeti.sk →
+              <ExternalLink size={12} />
+              Kúpiť priamo na sendeti.sk →
             </a>
 
             {/* Delivery info */}

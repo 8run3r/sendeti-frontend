@@ -108,8 +108,8 @@ export function Header() {
           >
             <div className="max-w-content mx-auto px-4 h-9 flex items-center justify-between">
               <div className="flex items-center gap-4 text-white text-xs font-semibold">
-                <a href="tel:+421000000000" className="hover:opacity-80 transition-opacity">📞 +421 000 000 000</a>
-                <a href="mailto:info@sendeti.sk" className="hover:opacity-80 transition-opacity hidden sm:block">✉ info@sendeti.sk</a>
+                <a href="tel:+421905449916" className="hover:opacity-80 transition-opacity">📞 +421 905 449 916</a>
+                <a href="mailto:sendeti@centrum.sk" className="hover:opacity-80 transition-opacity hidden sm:block">✉ sendeti@centrum.sk</a>
               </div>
               <div className="flex items-center gap-4 text-white text-xs font-semibold">
                 <span>🚚 Doprava od 2,90 €</span>
@@ -139,7 +139,7 @@ export function Header() {
                   SEN DETÍ
                 </span>
                 <span className="text-xs text-neutral-400 font-body -mt-0.5">
-                  pre radosť detí
+                  všetko pre radosť detí
                 </span>
               </div>
             </Link>

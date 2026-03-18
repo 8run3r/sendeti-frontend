@@ -41,8 +41,8 @@ function AnimatedCounter({ target, suffix = "", prefix = "" }: CounterProps) {
 
 const stats = [
   { icon: Users, label: "Spokojných zákazníkov", value: 2400, suffix: "+" },
-  { icon: Package, label: "Produktov v ponuke", value: 510, suffix: "+" },
-  { icon: Star, label: "Priemerné hodnotenie", value: 4.8, suffix: "★" },
+  { icon: Package, label: "Produktov v ponuke", value: 4800, suffix: "+" },
+  { icon: Star, label: "Rokov na trhu", value: 10, suffix: "+" },
   { icon: Award, label: "Certifikovaných produktov", value: 98, suffix: "%" },
 ];
 

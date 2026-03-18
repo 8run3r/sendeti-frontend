@@ -16,8 +16,8 @@ const fallbackCards = [
 
 const trustItems = [
   { icon: Truck, text: "Doprava od 2,90 €" },
-  { icon: Shield, text: "OEKO-TEX certifikát" },
-  { icon: Star, text: "4.8★ hodnotenie" },
+  { icon: Shield, text: "Certifikované produkty" },
+  { icon: Star, text: "Overený predajca" },
   { icon: ShoppingBag, text: "Vrátenie do 14 dní" },
 ];
 
@@ -64,7 +64,7 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-6"
             >
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              Prémiový detský e-shop
+              Overený slovenský e-shop pre mamičky
             </motion.div>
 
             <motion.h1
@@ -77,7 +77,7 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
               <span className="text-primary">detí</span>
               <br />
               <span className="text-4xl md:text-5xl lg:text-6xl font-normal italic text-neutral-600">
-                začína tu
+                všetko pre úsmev
               </span>
             </motion.h1>
 
@@ -87,8 +87,7 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-neutral-600 mb-8 max-w-md leading-relaxed"
             >
-              Objavte svet prémiových detských produktov — od obliečok cez oblečenie až po hračky.
-              Všetko bezpečné, certifikované a plné radosti.
+              Obliečky, oblečenie, hračky a školské potreby — všetko bezpečné a s láskou vybrané pre vaše deti.
             </motion.p>
 
             <motion.div
@@ -125,8 +124,8 @@ export function HeroSection({ heroProducts }: HeroSectionProps) {
                   { src: "https://picsum.photos/seed/av4/100/100", alt: "Zákazník 4" },
                   { src: "https://picsum.photos/seed/av5/100/100", alt: "Zákazník 5" },
                 ]}
-                badgeText="2 400+"
-                label="spokojných rodičov"
+                badgeText="4 800+"
+                label="produktov v ponuke"
               />
             </motion.div>
           </div>
