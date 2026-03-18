@@ -63,8 +63,11 @@ function slugify(text: string, id: string): string {
 }
 
 export function getShopUrl(url: string): string {
+  if (!url) return 'https://shop.sendeti.sk'
   return url
-    .replace('http://www.sendeti.sk', 'https://www.sendeti.sk')
+    .replace('https://www.sendeti.sk', 'https://shop.sendeti.sk')
+    .replace('http://www.sendeti.sk', 'https://shop.sendeti.sk')
+    .replace('https://sendeti.sk', 'https://shop.sendeti.sk')
 }
 
 function parseCdata(val: unknown): string {
