@@ -92,8 +92,11 @@ async function fetchProductsRaw(): Promise<Product[]> {
   if (_cache && Date.now() - _cache.ts < CACHE_TTL) return _cache.data
   try {
     const res = await fetch(FEED_URL, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SenDeti/1.0)' },
-      cache: 'no-store',
+      next: { revalidate: 3600 },
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Cache-Control': 'no-transform',
+      },
     })
     if (!res.ok) throw new Error(`Feed ${res.status}`)
 
@@ -154,6 +157,7 @@ async function fetchProductsRaw(): Promise<Product[]> {
         } satisfies Product
       })
       .filter(p => p.name && p.price > 0 && p.image)
+      .slice(0, 200)
     _cache = { data: products, ts: Date.now() }
     return products
   } catch (err) {
@@ -167,7 +171,7 @@ export const fetchProducts = fetchProductsRaw
 export async function getProductsByCategory(slug: string): Promise<Product[]> {
   const all = await fetchProducts()
   if (!slug || slug === 'vsetky') return all
-  return all.filter(p => p.categorySlug === slug)
+  return all.filter(p => p.categorySlug === slug).slice(0, 100)
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

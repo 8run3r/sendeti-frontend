@@ -2,24 +2,15 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-      {
-        protocol: "https",
-        hostname: "www.sendeti.sk",
-      },
-      {
-        protocol: "https",
-        hostname: "*.sendeti.sk",
-      },
-      {
-        protocol: "https",
-        hostname: "www.apoleus.sk",
-      },
+      { protocol: 'https', hostname: 'www.sendeti.sk', pathname: '/**' },
+      { protocol: 'https', hostname: 'sendeti.sk', pathname: '/**' },
+      { protocol: 'https', hostname: '*.sendeti.sk', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.apoleus.sk', pathname: '/**' },
+      { protocol: 'https', hostname: 'picsum.photos' },
     ],
+    minimumCacheTTL: 3600,
+    formats: ['image/webp'],
   },
-};
-
-export default nextConfig;
+  productionBrowserSourceMaps: false,
+}
+export default nextConfig
