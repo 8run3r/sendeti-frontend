@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { getProductsByCategory } from '@/lib/feed'
 import { CategoryClient } from './CategoryClient'
 
@@ -34,13 +35,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <div className="bg-white min-h-screen">
-      <CategoryClient
-        products={products}
-        categoryName={categoryName}
-        sort={sort}
-        inStock={inStock}
-        maxPrice={maxPrice}
-      />
+      <Suspense fallback={<div className="py-20 text-center text-neutral-400">Načítavam...</div>}>
+        <CategoryClient
+          products={products}
+          categoryName={categoryName}
+          sort={sort}
+          inStock={inStock}
+          maxPrice={maxPrice}
+        />
+      </Suspense>
     </div>
   )
 }
