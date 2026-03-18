@@ -1,25 +1,19 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart } from 'lucide-react'
+import { Heart, ShoppingCart, Check } from 'lucide-react'
 import type { Product } from '@/lib/feed'
 import { formatPrice } from '@/lib/feed'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
 import { showToast } from '@/components/ui/Toast'
 
-interface Props { product: Product }
-
-export function FeedProductCard({ product }: Props) {
+export function FeedProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false)
-  const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null)
-  const btnRef = useRef<HTMLButtonElement>(null)
-
+  const [added, setAdded] = useState(false)
   const addItem = useCartStore(s => s.addItem)
-  const openCart = useCartStore(s => s.openCart)
   const toggle = useWishlistStore(s => s.toggle)
   const isWished = useWishlistStore(s => s.hasItem(product.id))
 
@@ -28,26 +22,14 @@ export function FeedProductCard({ product }: Props) {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : undefined
 
-  const handleCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCart = (e: React.MouseEvent) => {
     e.preventDefault()
     if (!product.inStock) return
-    const btn = btnRef.current
-    if (btn) {
-      const rect = btn.getBoundingClientRect()
-      setRipple({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-      setTimeout(() => setRipple(null), 600)
-    }
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      slug: product.slug,
-      shopUrl: product.shopUrl,
-      inStock: product.inStock,
-    })
-    showToast(`✓ ${product.name.slice(0, 30)} pridaný do košíka`)
-    openCart()
+    addItem({ id: product.id, name: product.name, price: product.price,
+              image: product.image, slug: product.slug, shopUrl: product.shopUrl, inStock: product.inStock })
+    setAdded(true)
+    showToast(`✓ Pridané do košíka`)
+    setTimeout(() => setAdded(false), 1500)
   }
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -57,112 +39,98 @@ export function FeedProductCard({ product }: Props) {
   }
 
   return (
-    <motion.article
-      className="group relative bg-white rounded-3xl overflow-hidden cursor-pointer"
-      style={{ border: '1px solid rgba(225,187,201,0.5)' }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(200,116,217,0.18)', borderColor: '#C874D9' }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    <div
+      className="group bg-white rounded-2xl overflow-hidden transition-all duration-200"
+      style={{ border: '1px solid #EBE3F0' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <Link href={`/produkt/${product.slug}`}>
-        <div className="relative aspect-square overflow-hidden bg-pink-50">
-          <motion.div
-            className="absolute inset-0"
-            animate={{ scale: hovered ? 1.07 : 1 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          >
+        <div className="relative aspect-square bg-gray-50 overflow-hidden">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, 25vw"
+            className={`object-cover transition-all duration-400 ${hovered && hasSecond ? 'opacity-0' : 'opacity-100'}`}
+          />
+          {hasSecond && (
             <Image
-              src={product.image}
+              src={product.images[1]}
               alt={product.name}
               fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={`object-cover transition-opacity duration-400 ${hovered && hasSecond ? 'opacity-0' : 'opacity-100'}`}
+              sizes="(max-width: 640px) 50vw, 25vw"
+              className={`object-cover absolute inset-0 transition-all duration-400 ${hovered ? 'opacity-100 scale-105' : 'opacity-0 scale-100'}`}
             />
-            {hasSecond && (
-              <Image
-                src={product.images[1]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className={`object-cover absolute inset-0 transition-opacity duration-400 ${hovered ? 'opacity-100' : 'opacity-0'}`}
-              />
-            )}
-          </motion.div>
-
-          {product.badge && (
-            <div
-              className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[11px] font-black text-white uppercase tracking-wide"
-              style={{ background: product.badge === 'sale' ? 'linear-gradient(135deg,#F7A072,#e8875a)' : 'linear-gradient(135deg,#C874D9,#a855c7)' }}
-            >
-              {product.badge === 'sale' ? 'AKCIA' : product.badge === 'new' ? 'NOVÉ' : 'TOP'}
-            </div>
           )}
 
-          <motion.button
-            onClick={handleWishlist}
-            whileTap={{ scale: 1.4 }}
-            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
-          >
-            <Heart size={15} className={isWished ? 'fill-primary text-primary' : 'text-neutral-400'} />
-          </motion.button>
+          {/* Badge */}
+          {product.badge && (
+            <span className="absolute top-2.5 left-2.5 text-[10px] font-bold text-white px-2 py-0.5 rounded-full z-10 font-sans"
+                  style={{ background: product.badge === 'sale' ? '#F7A072' : '#C874D9' }}>
+              {product.badge === 'sale' ? 'AKCIA' : product.badge === 'new' ? 'NOVÉ' : 'TOP'}
+            </span>
+          )}
+          {discount && (
+            <span className="absolute top-2.5 right-2.5 text-[10px] font-bold text-white px-2 py-0.5 rounded-full z-10 font-sans"
+                  style={{ background: '#F7A072' }}>
+              -{discount}%
+            </span>
+          )}
 
+          {/* Wishlist */}
+          <button onClick={handleWishlist}
+                  className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all"
+                  style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
+                           border: isWished ? '1px solid #C874D9' : '1px solid transparent' }}>
+            <Heart size={15} style={{ color: isWished ? '#C874D9' : '#78716C', fill: isWished ? '#C874D9' : 'none' }} />
+          </button>
+
+          {/* Out of stock overlay */}
           {!product.inStock && (
             <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-              <span className="text-xs font-bold text-neutral-400 tracking-wide uppercase">Nedostupné</span>
+              <span className="text-xs font-bold font-sans" style={{ color: '#78716C' }}>Nedostupné</span>
             </div>
           )}
         </div>
       </Link>
 
       <div className="p-4">
-        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">{product.category}</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5 font-sans" style={{ color: '#78716C' }}>
+          {product.category}
+        </p>
         <Link href={`/produkt/${product.slug}`}>
-          <h3 className="text-sm font-bold text-neutral-900 line-clamp-2 mb-2 hover:text-primary transition-colors leading-snug">
+          <h3 className="text-sm font-semibold line-clamp-2 mb-3 leading-snug transition-colors font-sans"
+              style={{ color: '#1C1917', minHeight: '2.5rem' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#F7A072' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#1C1917' }}>
             {product.name}
           </h3>
         </Link>
-
         <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-base font-bold" style={{ color: '#F7A072' }}>{formatPrice(product.price)}</span>
+          <span className="text-base font-bold font-sans" style={{ color: '#F7A072' }}>
+            {formatPrice(product.price)}
+          </span>
           {product.originalPrice && (
-            <>
-              <span className="text-xs text-neutral-300 line-through">{formatPrice(product.originalPrice)}</span>
-              {discount && (
-                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: '#F7A072' }}>
-                  -{discount}%
-                </span>
-              )}
-            </>
+            <span className="text-xs line-through font-sans" style={{ color: '#78716C' }}>
+              {formatPrice(product.originalPrice)}
+            </span>
           )}
         </div>
-
-        <motion.button
-          ref={btnRef}
+        <button
           onClick={handleCart}
           disabled={!product.inStock}
-          whileTap={{ scale: 0.97 }}
-          className="relative w-full h-9 rounded-xl text-xs font-bold overflow-hidden transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            border: '2px solid #F7A072',
-            color: hovered ? 'white' : '#F7A072',
-            background: hovered ? 'linear-gradient(135deg,#F7A072,#e8875a)' : 'transparent',
-          }}
+          className="w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 font-sans disabled:opacity-40 disabled:cursor-not-allowed"
+          style={added
+            ? { background: '#16A34A', color: 'white', border: '2px solid #16A34A' }
+            : { border: '2px solid #F7A072', color: hovered ? 'white' : '#F7A072',
+                background: hovered ? '#F7A072' : 'transparent' }
+          }
         >
-          {ripple && (
-            <motion.span
-              initial={{ width: 0, height: 0, opacity: 0.5 }}
-              animate={{ width: 200, height: 200, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute rounded-full bg-white/40 pointer-events-none -translate-x-1/2 -translate-y-1/2"
-              style={{ left: ripple.x, top: ripple.y }}
-            />
-          )}
-          <ShoppingCart size={13} />
-          Pridať do košíka
-        </motion.button>
+          {added ? <Check size={13} /> : <ShoppingCart size={13} />}
+          {added ? 'Pridané!' : 'Pridať do košíka'}
+        </button>
       </div>
-    </motion.article>
+    </div>
   )
 }

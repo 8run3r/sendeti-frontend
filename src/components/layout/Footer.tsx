@@ -1,53 +1,92 @@
+import Link from 'next/link'
+
+const SHOP_LINKS = [
+  ['Bytový textil',   '/kategoria/bytovy-textil'],
+  ['Oblečenie',       '/kategoria/oblecenie'],
+  ['Hračky',          '/kategoria/hracky'],
+  ['Školské potreby', '/kategoria/skolske-potreby'],
+  ['Kojenecké',       '/kategoria/kojenecke'],
+  ['Všetky produkty', '/kategoria/vsetky'],
+] as const
+
+const INFO_LINKS = [
+  ['Dodacie podmienky', 'https://shop.sendeti.sk/DODACIE-PODMIENKY-a4_0.htm'],
+  ['Obchodné podmienky','https://shop.sendeti.sk/OBCHODNE-PODMIENKY-a3_0.htm'],
+  ['GDPR',              'https://shop.sendeti.sk/GDPR-a6_0.htm'],
+  ['Kontakty',          'https://shop.sendeti.sk/KONTAKTY-a2_0.htm'],
+] as const
+
 export default function Footer() {
   return (
-    <footer className="bg-[#1a1a1a] text-white mt-20">
-      <div className="h-1 bg-gradient-to-r from-coral to-purple" />
-      <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
-          <p className="font-display text-2xl font-bold text-coral mb-2">SEN DETÍ</p>
-          <p className="text-gray-400 text-sm leading-relaxed">
+    <footer className="bg-dark text-white mt-24">
+      {/* Gradient accent line */}
+      <div className="h-1" style={{ background: 'linear-gradient(90deg,#C874D9,#F7A072)' }} />
+
+      <div className="max-w-content mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        {/* Brand */}
+        <div className="lg:col-span-1">
+          <p className="font-display text-3xl font-bold text-coral mb-3">SEN DETÍ</p>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: '#A09890' }}>
             Starostlivo vyberané detské oblečenie, obliečky a hračky.
-            S láskou pre vaše deti.
+            S láskou pre vaše deti od roku 2010.
           </p>
+          <div className="flex flex-col gap-1.5">
+            <a href="tel:+421905449916" className="text-coral font-bold text-base hover:opacity-80 transition-opacity">
+              📞 +421 905 449 916
+            </a>
+            <a href="mailto:sendeti@centrum.sk" className="text-sm hover:text-coral transition-colors" style={{ color: '#A09890' }}>
+              ✉️ sendeti@centrum.sk
+            </a>
+          </div>
         </div>
+
+        {/* Shop */}
         <div>
-          <p className="font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">
-            Informácie
-          </p>
-          <div className="space-y-2">
-            {([
-              ['Dodacie podmienky', 'https://shop.sendeti.sk/DODACIE-PODMIENKY-a4_0.htm'],
-              ['Obchodné podmienky', 'https://shop.sendeti.sk/OBCHODNE-PODMIENKY-a3_0.htm'],
-              ['GDPR', 'https://shop.sendeti.sk/GDPR-a6_0.htm'],
-              ['Kontakty', 'https://shop.sendeti.sk/KONTAKTY-a2_0.htm'],
-            ] as [string, string][]).map(([name, url]) => (
-              <a key={name} href={url}
-                 className="block text-gray-400 text-sm hover:text-coral transition-colors">
-                {name}
-              </a>
+          <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: '#6B6460' }}>Nakupovanie</p>
+          <ul className="space-y-2.5">
+            {SHOP_LINKS.map(([name, href]) => (
+              <li key={name}>
+                <Link href={href} className="text-sm transition-colors hover:text-coral" style={{ color: '#A09890' }}>
+                  {name}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
+
+        {/* Info */}
         <div>
-          <p className="font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">
-            Kontakt
-          </p>
-          <div className="space-y-2">
-            <a href="tel:+421905449916"
-               className="block text-coral font-bold text-lg hover:opacity-80">
-              +421 905 449 916
-            </a>
-            <a href="mailto:sendeti@centrum.sk"
-               className="block text-gray-400 text-sm hover:text-coral">
-              sendeti@centrum.sk
-            </a>
-          </div>
+          <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: '#6B6460' }}>Informácie</p>
+          <ul className="space-y-2.5">
+            {INFO_LINKS.map(([name, href]) => (
+              <li key={name}>
+                <a href={href} className="text-sm transition-colors hover:text-coral" style={{ color: '#A09890' }}>
+                  {name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Trust */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: '#6B6460' }}>Prečo my</p>
+          <ul className="space-y-3">
+            {[
+              '✅ Overený slovenský predajca',
+              '🚚 Doprava od 2,90 €',
+              '↩️ Vrátenie do 14 dní',
+              '🔒 Bezpečná platba',
+              '📦 Doručenie do 3 dní',
+            ].map(item => (
+              <li key={item} className="text-sm" style={{ color: '#A09890' }}>{item}</li>
+            ))}
+          </ul>
         </div>
       </div>
-      <div className="border-t border-gray-800 py-4 text-center">
-        <p className="text-gray-600 text-xs">
-          © 2026 Sen Detí
-        </p>
+
+      <div className="py-5 text-center text-xs" style={{ borderTop: '1px solid #2C2825', color: '#6B6460' }}>
+        © 2026 Sen Detí · Všetky práva vyhradené
       </div>
     </footer>
   )

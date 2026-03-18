@@ -1,23 +1,25 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
-        coral:  '#F7A072',
-        purple: '#C874D9',
-        pink:   '#E1BBC9',
-        mint:   '#E2FCEF',
-        cream:  '#FDF8F3',
+        coral:     '#F7A072',
+        violet:    '#C874D9',
+        cream:     '#FEF9F4',
+        blush:     '#FDEEE5',
+        lavender:  '#F3ECFC',
+        dark:      '#1C1917',
+        muted:     '#78716C',
+        border:    '#EBE3F0',
       },
       fontFamily: {
-        display: ['var(--font-display)', 'serif'],
-        sans:    ['var(--font-body)', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        sans:    ['var(--font-body)', 'system-ui', 'sans-serif'],
+      },
+      maxWidth: {
+        content: '1200px',
       },
     },
   },

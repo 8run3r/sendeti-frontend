@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Playfair_Display, DM_Sans } from 'next/font/google'
 import dynamic from 'next/dynamic'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
@@ -10,33 +10,30 @@ const CartDrawer = dynamic(
   { ssr: false }
 )
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Playfair_Display({
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 })
 
 const bodyFont = DM_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-body',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
   title: 'Sen Detí — Prémiový detský e-shop',
-  description: 'Oblečenie, obliečky a hračky pre deti.',
+  description: 'Oblečenie, obliečky a hračky pre deti. Overený slovenský e-shop.',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="sk" className={`${displayFont.variable} ${bodyFont.variable}`}>
-      <body className="font-sans antialiased bg-cream">
+      <body className="font-sans antialiased bg-cream text-dark">
         <Navbar />
         <CartDrawer />
         <main className="min-h-screen">{children}</main>
