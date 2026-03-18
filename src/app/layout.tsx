@@ -2,10 +2,9 @@ import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
+import CartDrawer from '@/components/cart/CartDrawer'
 import { Footer } from '@/components/layout/Footer'
-import { CartDrawer } from '@/components/layout/CartDrawer'
 import { ToastProvider } from '@/components/ui/Toast'
-import { ScrollProgressBar } from '@/components/marketing/ScrollProgressBar'
 
 const displayFont = Cormorant_Garamond({
   subsets: ['latin'],
@@ -33,12 +32,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="sk" className={`${displayFont.variable} ${bodyFont.variable}`}>
-      <body>
-        <ScrollProgressBar />
+      <body className="font-sans antialiased bg-white">
         <Navbar />
-        <main>{children}</main>
-        <Footer />
         <CartDrawer />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
         <ToastProvider />
       </body>
     </html>
