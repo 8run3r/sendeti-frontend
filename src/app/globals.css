@@ -1,81 +1,25 @@
-/* Fonts loaded via next/font in layout.tsx */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --coral:   #F7A072;
-    --coral-d: #e8875a;
-    --coral-l: #FFF0EB;
-    --purple:  #C874D9;
-    --purple-d:#a855c7;
-    --purple-l:#F5E6F8;
-    --pink:    #E1BBC9;
-    --pink-l:  #FBF0F4;
-    --mint:    #E2FCEF;
-    --mint-d:  #52C97E;
-    --dark:    #1a1a1a;
-  }
-
-  html { font-family: "Nunito", sans-serif; scroll-behavior: smooth; }
-  body { @apply bg-white text-neutral-900; -webkit-font-smoothing: antialiased; }
   * { box-sizing: border-box; }
 
-  h1,h2,h3,h4 {
-    font-family: "Playfair Display", Georgia, serif;
-    letter-spacing: -0.01em;
+  body {
+    background: #FDF8F3;
+    color: #1a1a1a;
   }
 
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: var(--pink-l); }
-  ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), serif;
+  }
 }
 
 @layer utilities {
-  .font-display { font-family: "Playfair Display", Georgia, serif; }
-  .font-body { font-family: "Nunito", sans-serif; }
-  .font-mono-price { font-family: "Nunito", sans-serif; font-weight: 800; letter-spacing: -0.02em; }
-
-  .dot-grid {
-    background-image: radial-gradient(circle, rgba(200,116,217,0.08) 1.5px, transparent 1.5px);
-    background-size: 24px 24px;
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .gradient-brand { background: linear-gradient(135deg, var(--purple), var(--coral)); }
-  .text-gradient {
-    background: linear-gradient(135deg, var(--purple), var(--coral));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-}
-
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
-}
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-@keyframes ripple { to { transform: scale(4); opacity: 0; } }
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateY(20px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes orbit {
-  from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
-  to   { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
-}
-
-.animate-marquee { animation: marquee 30s linear infinite; }
-.animate-marquee-reverse { animation: marquee 30s linear infinite reverse; }
-.animate-orbit { animation: orbit 8s linear infinite; }
-
-.scroll-progress {
-  position: fixed; top: 0; left: 0; height: 3px;
-  background: linear-gradient(90deg, var(--purple), var(--coral));
-  z-index: 9999; transition: width 0.1s linear;
 }
