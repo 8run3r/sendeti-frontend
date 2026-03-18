@@ -20,6 +20,11 @@ export default async function HomePage() {
 
   const featured = products.filter(p => p.inStock).slice(0, 8)
 
+  const categoryCount = CATEGORIES.reduce((acc, cat) => {
+    acc[cat.slug] = products.filter(p => p.categorySlug === cat.slug).length
+    return acc
+  }, {} as Record<string, number>)
+
   return (
     <div>
       {/* HERO */}
@@ -27,8 +32,8 @@ export default async function HomePage() {
                className="py-20 px-6 overflow-hidden">
         <div className="max-w-content mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold mb-6 font-sans"
-                 style={{ background: 'white', border: '1px solid #EBE3F0', color: '#C874D9' }}>
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide mb-6 font-sans"
+                 style={{ background: 'rgba(247,160,114,0.1)', border: '1px solid rgba(247,160,114,0.2)', color: '#F7A072' }}>
               🌸 Overený slovenský e-shop od roku 2010
             </div>
 
@@ -73,19 +78,22 @@ export default async function HomePage() {
           </div>
 
           {/* Floating product cards — desktop only */}
-          <div className="relative h-[480px] hidden lg:block">
+          <div className="relative h-[420px] hidden lg:block" style={{ overflow: 'visible' }}>
             {featured.slice(0, 3).map((p, i) => (
               <Link key={p.id} href={`/produkt/${p.slug}`}
-                    className="absolute bg-white rounded-2xl overflow-hidden transition-all hover:-translate-y-2"
+                    className="absolute bg-white rounded-2xl overflow-hidden transition-all hover:shadow-2xl hover:scale-105"
                     style={{
-                      width: i === 0 ? '200px' : i === 1 ? '180px' : '190px',
-                      top:   i === 0 ? '30px'  : i === 1 ? '200px' : '60px',
-                      left:  i === 0 ? '60px'  : i === 1 ? '30px'  : '240px',
+                      width: i === 0 ? '176px' : i === 1 ? '176px' : '160px',
+                      top:   i === 0 ? '0px'   : i === 1 ? '160px' : '64px',
+                      left:  i === 0 ? '32px'  : i === 1 ? '192px' : undefined,
+                      right: i === 2 ? '16px'  : undefined,
+                      transform: i === 0 ? 'rotate(-4deg)' : i === 1 ? 'rotate(3deg)' : 'rotate(-2deg)',
                       boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
                       border: '1px solid #EBE3F0',
+                      zIndex: 10,
                     }}>
-                <div className="relative aspect-square bg-gray-50">
-                  <Image src={p.image} alt={p.name} fill className="object-cover" sizes="200px" />
+                <div className="relative aspect-square bg-gray-50 rounded-xl overflow-hidden">
+                  <Image src={p.image} alt={p.name} fill className="object-cover" sizes="176px" />
                   {i === 0 && (
                     <span className="absolute top-2 left-2 text-[10px] font-bold text-white px-2 py-0.5 rounded-full font-sans"
                           style={{ background: '#C874D9' }}>NOVÉ</span>
@@ -132,6 +140,11 @@ export default async function HomePage() {
                 <span className="font-bold text-sm text-center leading-tight font-sans" style={{ color: '#1C1917' }}>
                   {cat.name}
                 </span>
+                {categoryCount[cat.slug] > 0 && (
+                  <span className="mt-1.5 text-xs font-medium" style={{ color: '#78716C' }}>
+                    {categoryCount[cat.slug]} produktov
+                  </span>
+                )}
               </Link>
             ))}
           </div>

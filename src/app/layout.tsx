@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased bg-cream text-dark">
         <Navbar />
         <CartDrawer />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen animate-fadeIn">{children}</main>
         <Footer />
       </body>
     </html>

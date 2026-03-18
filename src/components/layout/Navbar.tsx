@@ -6,19 +6,85 @@ import { ShoppingCart, Heart, Search, Menu, X, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 
 const CATS = [
-  { name: 'Bytový textil',   slug: 'bytovy-textil',   emoji: '🛏️', subs: ['Obliečky','Plachty','Deky','Vankúšiky','Župany','Uteráky'] },
-  { name: 'Oblečenie',       slug: 'oblecenie',        emoji: '👗',  subs: ['Šaty','Tričká','Pyžamá','Mikiny','Legíny','Plavky'] },
-  { name: 'Hračky',          slug: 'hracky',           emoji: '🧸',  subs: ['Hračky mix','Plyšové','Vonkajšie hračky'] },
-  { name: 'Školské potreby', slug: 'skolske-potreby',  emoji: '🎒',  subs: ['Školské tašky','Ruksaky','Peračníky','Papiernictvo'] },
-  { name: 'Kojenecké',       slug: 'kojenecke',        emoji: '👶',  subs: ['Oblečenie','Hračky','Spánok'] },
-  { name: 'Kuchyňa',         slug: 'kuchyna',          emoji: '🍽️', subs: ['Poháre','Taniere','Fľaše','Príbory'] },
-  { name: 'Party',           slug: 'party',            emoji: '🎉',  subs: ['Tortové zápichy','Party sety','Balóny'] },
-  { name: 'Doplnky',         slug: 'doplnky',          emoji: '✨',  subs: ['Tašky','Hodinky','Do vlasov'] },
+  {
+    name: 'Bytový textil', slug: 'bytovy-textil', emoji: '🛏️',
+    subs: [
+      { name: 'Obliečky', filter: 'obliecky' },
+      { name: 'Plachty', filter: 'plachty' },
+      { name: 'Deky', filter: 'deky' },
+      { name: 'Vankúšiky', filter: 'vankusiky' },
+      { name: 'Župany', filter: 'zupany' },
+      { name: 'Uteráky', filter: 'uteraky' },
+    ],
+  },
+  {
+    name: 'Oblečenie', slug: 'oblecenie', emoji: '👗',
+    subs: [
+      { name: 'Spoločenské šaty', filter: 'spolocenske-saty' },
+      { name: 'Tričká', filter: 'tricka' },
+      { name: 'Pyžamá', filter: 'pyzama' },
+      { name: 'Mikiny', filter: 'mikiny' },
+      { name: 'Legíny', filter: 'leginy' },
+      { name: 'Šaty & Sukne', filter: 'saty' },
+      { name: 'Plavky', filter: 'plavky' },
+    ],
+  },
+  {
+    name: 'Hračky', slug: 'hracky', emoji: '🧸',
+    subs: [
+      { name: 'Hračky mix', filter: 'hracky-mix' },
+      { name: 'Plyšové', filter: 'plysove' },
+      { name: 'Vonkajšie hračky', filter: 'vonkajsie' },
+    ],
+  },
+  {
+    name: 'Školské potreby', slug: 'skolske-potreby', emoji: '🎒',
+    subs: [
+      { name: 'Školské tašky', filter: 'tasky' },
+      { name: 'Ruksaky', filter: 'ruksaky' },
+      { name: 'Peračníky', filter: 'peracniky' },
+      { name: 'Papiernictvo', filter: 'papiernictvo' },
+    ],
+  },
+  {
+    name: 'Kojenecké', slug: 'kojenecke', emoji: '👶',
+    subs: [
+      { name: 'Oblečenie', filter: 'oblecenie' },
+      { name: 'Hračky', filter: 'hracky' },
+      { name: 'Spánok', filter: 'spanok' },
+    ],
+  },
+  {
+    name: 'Kuchyňa', slug: 'kuchyna', emoji: '🍽️',
+    subs: [
+      { name: 'Poháre & Hrnčeky', filter: 'pohare' },
+      { name: 'Taniere & Sety', filter: 'taniere' },
+      { name: 'Fľaše', filter: 'flase' },
+      { name: 'Príbory', filter: 'pribory' },
+    ],
+  },
+  {
+    name: 'Party & Darčeky', slug: 'party', emoji: '🎉',
+    subs: [
+      { name: 'Tortové zápichy', filter: 'tortove-zapichy' },
+      { name: 'Party sety', filter: 'party-sety' },
+      { name: 'Balóny', filter: 'balony' },
+    ],
+  },
+  {
+    name: 'Doplnky', slug: 'doplnky', emoji: '✨',
+    subs: [
+      { name: 'Tašky & Kabelky', filter: 'tasky' },
+      { name: 'Hodinky', filter: 'hodinky' },
+      { name: 'Do vlasov', filter: 'vlasy' },
+    ],
+  },
 ]
 
 export default function Navbar() {
   const [openCat, setOpenCat] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [expandedMobile, setExpandedMobile] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const totalItems = useCartStore(s => s.totalItems())
@@ -26,10 +92,14 @@ export default function Navbar() {
 
   useEffect(() => { setMounted(true) }, [])
 
-  function go(slug: string) {
+  function go(slug: string, filter?: string) {
     setOpenCat(null)
     setMobileOpen(false)
-    router.push(`/kategoria/${slug}`)
+    if (filter) {
+      router.push(`/kategoria/${slug}?q=${filter}`)
+    } else {
+      router.push(`/kategoria/${slug}`)
+    }
   }
 
   return (
@@ -128,10 +198,10 @@ export default function Navbar() {
                        style={{ border: '1px solid #EBE3F0', borderTop: '3px solid #F7A072', boxShadow: '0 16px 48px rgba(0,0,0,0.12)' }}>
                     <div className="space-y-0.5 mb-4">
                       {cat.subs.map(sub => (
-                        <button key={sub} onClick={() => go(cat.slug)}
+                        <button key={sub.filter} onClick={() => go(cat.slug, sub.filter)}
                           className="w-full text-left px-3 py-2 text-sm text-muted rounded-xl
                                      hover:bg-blush hover:text-coral transition-colors font-sans">
-                          {sub}
+                          {sub.name}
                         </button>
                       ))}
                     </div>
@@ -156,17 +226,54 @@ export default function Navbar() {
           <div className="px-4 py-4">
             <div className="relative mb-5">
               <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-              <input placeholder="Hľadajte..." className="w-full h-11 pl-11 pr-4 rounded-full text-sm font-sans outline-none"
-                style={{ border: '2px solid #EBE3F0', background: '#FEF9F4' }} />
+              <input
+                placeholder="Hľadajte..."
+                className="w-full h-11 pl-11 pr-4 rounded-full text-sm font-sans outline-none"
+                style={{ border: '2px solid #EBE3F0', background: '#FEF9F4' }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const val = (e.target as HTMLInputElement).value.trim()
+                    if (val) { setMobileOpen(false); router.push(`/vyhladavanie?q=${encodeURIComponent(val)}`) }
+                  }
+                }}
+              />
             </div>
-            <div className="space-y-1">
+            <div className="divide-y divide-gray-100">
               {CATS.map(cat => (
-                <button key={cat.slug} onClick={() => go(cat.slug)}
-                  className="w-full flex items-center gap-3 py-3.5 px-4 rounded-2xl hover:bg-blush transition-colors text-left">
-                  <span className="text-2xl">{cat.emoji}</span>
-                  <span className="font-semibold text-dark font-sans">{cat.name}</span>
-                  <ChevronDown size={15} className="ml-auto text-muted" />
-                </button>
+                <div key={cat.slug}>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => go(cat.slug)}
+                      className="flex-1 flex items-center gap-3 py-4 px-2 text-left"
+                    >
+                      <span className="text-2xl">{cat.emoji}</span>
+                      <span className="font-semibold font-sans" style={{ color: '#1C1917' }}>{cat.name}</span>
+                    </button>
+                    <button
+                      onClick={() => setExpandedMobile(expandedMobile === cat.slug ? null : cat.slug)}
+                      className="p-4"
+                    >
+                      <ChevronDown
+                        size={18}
+                        className={`transition-transform text-muted ${expandedMobile === cat.slug ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
+                  {expandedMobile === cat.slug && (
+                    <div className="pl-14 pb-3 space-y-0.5">
+                      {cat.subs.map(sub => (
+                        <button
+                          key={sub.filter}
+                          onClick={() => go(cat.slug, sub.filter)}
+                          className="w-full text-left py-2.5 px-3 text-sm rounded-xl transition-colors font-sans hover:bg-blush hover:text-coral"
+                          style={{ color: '#78716C' }}
+                        >
+                          → {sub.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
