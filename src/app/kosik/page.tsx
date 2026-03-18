@@ -141,7 +141,7 @@ export default function CartPage() {
               </div>
 
               <a
-                href="https://www.sendeti.sk"
+                href="https://shop.sendeti.sk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full"
