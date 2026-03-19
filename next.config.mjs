@@ -7,6 +7,8 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.sendeti.sk', pathname: '/**' },
       { protocol: 'https', hostname: 'www.apoleus.sk', pathname: '/**' },
       { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: '*.eshop-rychle.cz', pathname: '/**' },
+      { protocol: 'https', hostname: '*.s2.eshop-rychle.cz', pathname: '/**' },
     ],
     minimumCacheTTL: 3600,
     formats: ['image/webp', 'image/avif'],
