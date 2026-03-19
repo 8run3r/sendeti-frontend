@@ -107,7 +107,6 @@ export default function Navbar() {
       {/* Promo bar */}
       <div style={{ background: 'linear-gradient(90deg,#C874D9,#F7A072)' }}
            className="text-white text-xs py-2 px-4 text-center font-medium tracking-wide">
-        <span className="hidden sm:inline">🚚 Doprava zadarmo nad 35 € &nbsp;·&nbsp; </span>
         ↩️ Vrátenie do 14 dní &nbsp;·&nbsp;
         <a href="tel:+421905449916" className="font-bold hover:underline">📞 +421 905 449 916</a>
       </div>
